@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+    --cream:#F5F1EA;
+    --cream-2:#EDE8DF;
+    --paper:#FAF7F1;
+    --ink:#1C1C1A;
+    --ink-soft:#3A3733;
+    --muted:#7A7068;
+    --line:#D8D0C6;
+    --sage:#6B7355;
+    --accent:#B5651D;
+    --accent-h:#8B3E0B;
+    --taupe:#B8A68A;
+    --danger:#C0392B;
+    --surface:#ffffff;
+    --bg:#F5F1EA;
+}
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body{
+    background:
+        radial-gradient(circle at top left,
+        rgba(107,115,85,.08),
+        transparent 30%),
+        var(--bg);
+
+    color:var(--ink);
+
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:30px;
+}
+
+        .auth-card{
+
+    width:100%;
+    max-width:460px;
+
+    background:rgba(255,255,255,.72);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid var(--line);
+
+    border-radius:32px;
+
+    padding:48px;
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.05);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+        h1{
+
+    font-family:'Fraunces', serif;
+
+    font-size:clamp(42px,3vw,64px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    font-weight:300;
+
+    margin-bottom:14px;
+}
+
+        .subtitle{
+
+    color:var(--ink-soft);
+
+    font-size:15px;
+
+    line-height:1.7;
+
+    max-width:320px;
+
+    margin:0 auto 34px;
+}
+
+        /* --- FORM STYLING --- */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        input[type="email"],
+input[type="text"]{
+
+    width:100%;
+
+    height:56px;
+
+    border-radius:16px;
+
+    border:1px solid var(--line);
+
+    background:rgba(255,255,255,.8);
+
+    padding:0 18px;
+
+    font-size:15px;
+
+    font-weight:500;
+
+    transition:.3s;
+}
+
+        input:focus{
+
+    outline:none;
+
+    border-color:var(--sage);
+
+    background:white;
+
+    box-shadow:
+        0 0 0 4px rgba(107,115,85,.08);
+}
+
+        .primary-btn{
+
+    width:100%;
+
+    height:56px;
+
+    border:none;
+
+    border-radius:999px;
+
+    background:var(--ink);
+
+    color:var(--cream);
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    letter-spacing:.2em;
+
+    text-transform:uppercase;
+
+    font-weight:600;
+
+    transition:all .3s ease;
+
+    margin-top:12px;
+}
+
+.primary-btn:hover{
+
+    background:var(--sage);
+
+    transform:translateY(-2px);
+}
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- THE RESEND LINK-BUTTON --- */
+        .resend-container {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: var(--muted);
+                text-align: center;
+
+        }
+
+        .resend-link {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: inherit;
+            transition: color 0.2s;
+        }
+
+        .resend-link:hover {
+            color: var(--ink);
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        hr { border: 0; border-top: 1px solid var(--line); margin: 30px 0; }
+        @media(max-width:640px){
+
+    body{
+        padding:18px;
+    }
+
+    .auth-card{
+        padding:36px 24px;
+        border-radius:24px;
+    }
+
+    h1{
+        font-size:42px;
+    }
+
+}
+    </style>
+</head>
+<body>
+
+<div class="auth-card animate__animated animate__fadeInUp">
+    <h1>Verification</h1>
+    <p class="subtitle">Secure access to your account</p>
+
+    {% if not show_otp %}
+        <form action="/auth/send-email-otp" method="POST">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="name@company.com" required>
+            </div>
+            <button type="submit" class="primary-btn" id="btnsend">
+                Send OTP
+            </button>
+        </form>
+    {% endif %}
+
+    {% if show_otp %}
+        <hr>
+        
+        <div class="animate__animated animate__fadeIn">
+            <h1>Enter OTP</h1>
+            <p class="subtitle">Check your inbox for the reset code.</p>
+            
+            <form action="/auth/verify-email-otp" method="POST">
+                <div class="input-group">
+                    <label>One-Time Password</label>
+                    <input type="text" name="otp" placeholder="••••••" value="{{otp}}" required>
+                </div>
+                <button type="submit" name="verify" class="primary-btn">Verify Account</button>
+            </form>
+
+            {% with messages = get_flashed_messages(with_categories=True) %}
+              {% for category, message in messages %}
+                <p class="message">{{ message }}</p>
+              {% endfor %}
+            {% endwith %}
+
+            <div class="resend-container">
+                Didn't receive a code? 
+                <form action="/auth/send-email-otp" method="POST" style="display: inline;">
+                    <input type="hidden" name="email" value="{{email}}">
+                    <button type="submit" id="resend" name="resend" class="resend-link" disabled>
+                        Resend Code (60s)
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<script>
+let resendBtn = document.getElementById("resend");
+
+if (resendBtn) {
+    let resendTime = 120; // 2 minutes cooldown
+
+    resendBtn.disabled = true;
+
+    const resendTimer = setInterval(() => {
+        resendTime--;
+
+        if (resendTime > 0) {
+            resendBtn.innerText = `Resend Code (${resendTime}s)`;
+        } else {
+            resendBtn.disabled = false;
+            resendBtn.innerText = "Resend Code";
+            clearInterval(resendTimer);
+        }
+    }, 1000);
+}
+
+// disable send button after click (optional safety)
+const form = document.getElementById("form-send-otp");
+const btnsend = document.getElementById("btnsend");
+
+if (form && btnsend) {
+    form.addEventListener("submit", (e) => {
+        btnsend.disabled = true;
+        btnsend.innerText = "Sending...";
+    });
+}
+</script>
+</body>
+</html>

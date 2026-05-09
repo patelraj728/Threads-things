@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+{% block title %}chat — Thread & Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+    :root{
+      --cream:#F5F1EA;
+      --cream-2:#EDE8DF;
+      --paper:#FAF7F1;
+      --ink:#1C1C1A;
+      --ink-soft:#3A3733;
+      --muted:#7A7068;
+      --line:#D8D0C6;
+      --sage:#6B7355;
+      --taupe:#B8A68A;
+
+      --nav-h:72px;
+
+      --serif:'Fraunces', serif;
+      --sans:'Inter', sans-serif;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+    }
+
+    body{
+      font-family:var(--sans);
+
+      background:
+        radial-gradient(
+          circle at top,
+          #222 0%,
+          #111 30%,
+          #050505 100%
+        );
+
+      color:white;
+
+      overflow-x:hidden;
+
+      -webkit-font-smoothing:antialiased;
+    }
+
+    a{
+      text-decoration:none;
+      color:inherit;
+    }
+
+    /* =====================================================
+       NAVBAR
+    ===================================================== */
+
+    .nav{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+
+      height:var(--nav-h);
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      padding:0 clamp(20px,4vw,56px);
+
+      z-index:1000;
+
+      background:
+        rgba(8,8,8,.45);
+
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+
+      border-bottom:
+        1px solid rgba(255,255,255,.06);
+    }
+
+    .brand{
+      font-family:var(--serif);
+
+      font-size:24px;
+      font-weight:300;
+
+      letter-spacing:-0.02em;
+
+      color:white;
+    }
+
+    .brand em{
+      font-style:italic;
+      color:var(--taupe);
+    }
+
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:30px;
+    }
+
+    .nav-links a{
+      position:relative;
+
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+
+      color:rgba(255,255,255,.72);
+
+      transition:color .25s ease;
+    }
+
+    .nav-links a::after{
+      content:"";
+
+      position:absolute;
+      left:0;
+      bottom:-6px;
+
+      width:0;
+      height:1px;
+
+      background:white;
+
+      transition:width .3s ease;
+    }
+
+    .nav-links a:hover{
+      color:white;
+    }
+
+    .nav-links a:hover::after{
+      width:100%;
+    }
+
+    .nav-btn{
+      padding:12px 20px;
+
+      border-radius:999px;
+
+      background:white;
+      color:black;
+
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+
+      transition:all .25s ease;
+    }
+
+    .nav-btn:hover{
+      transform:translateY(-2px);
+    }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+
+    .hero{
+      position:relative;
+
+      width:100%;
+      min-height:100vh;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      overflow:hidden;
+    }
+
+    .hero::before{
+      content:"";
+
+      position:absolute;
+      inset:0;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(255,255,255,.08),
+          transparent 60%
+        );
+
+      pointer-events:none;
+    }
+
+    .container{
+      width:100%;
+
+      display:flex;
+      justify-content:center;
+      align-items:center;
+
+      padding:40px;
+
+      overflow:hidden;
+
+      position:relative;
+      z-index:2;
+    }
+
+    .text{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      white-space:nowrap;
+
+      font-size:
+        clamp(70px, 12vw, 240px);
+
+      line-height:.9;
+
+      letter-spacing:0.04em;
+
+      text-transform:uppercase;
+
+      color:white;
+
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .char{
+      display:inline-block;
+
+      font-variation-settings:"wght" 250;
+
+      transform-origin:center center;
+
+      will-change:
+        transform,
+        font-variation-settings,
+        opacity;
+
+      transition:
+        transform .18s cubic-bezier(.2,.8,.2,1),
+        opacity .18s ease,
+        color .18s ease;
+    }
+
+    .space{
+      width:.3em;
+    }
+
+    /* =====================================================
+       BOTTOM TEXT
+    ===================================================== */
+
+    .hero-meta{
+      position:absolute;
+
+      bottom:40px;
+      left:50%;
+
+      transform:translateX(-50%);
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+
+      z-index:3;
+    }
+
+    .hero-label{
+      font-size:11px;
+
+      letter-spacing:.32em;
+      text-transform:uppercase;
+
+      color:rgba(255,255,255,.55);
+    }
+
+    .scroll-line{
+      width:1px;
+      height:60px;
+
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(255,255,255,.7),
+          transparent
+        );
+
+      animation:scrollLine 2s ease-in-out infinite;
+    }
+
+    /* =====================================================
+       GLOW
+    ===================================================== */
+
+    .glow{
+      position:absolute;
+
+      width:700px;
+      height:700px;
+
+      border-radius:50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(255,255,255,.12),
+          transparent 70%
+        );
+
+      filter:blur(60px);
+
+      pointer-events:none;
+
+      z-index:1;
+    }
+
+    .glow.one{
+      top:-200px;
+      left:-120px;
+    }
+
+    .glow.two{
+      bottom:-260px;
+      right:-120px;
+    }
+
+    /* =====================================================
+       ANIMATIONS
+    ===================================================== */
+
+    @keyframes scrollLine{
+      0%,100%{
+        opacity:.25;
+        transform:scaleY(.7);
+      }
+      50%{
+        opacity:1;
+        transform:scaleY(1);
+      }
+    }
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media(max-width:900px){
+
+      .nav-links{
+        display:none;
+      }
+
+    }
+
+    @media(max-width:768px){
+
+      .text{
+        font-size:18vw;
+      }
+
+      .hero-meta{
+        bottom:24px;
+      }
+
+      .container{
+        padding:20px;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- =====================================================
+       HERO
+  ====================================================== -->
+
+  <section class="hero">
+
+    <div class="glow one"></div>
+    <div class="glow two"></div>
+
+    <div class="container">
+      <div class="text" id="text"></div>
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-label">
+        Interactive Typography
+      </div>
+
+      <div class="scroll-line"></div>
+    </div>
+
+  </section>
+
+  <script>
+
+    const textElement =
+      document.getElementById('text');
+
+    const text =
+      "Coming Soon";
+
+    // Build Letters
+
+    text.split('').forEach(char => {
+
+      const span =
+        document.createElement('span');
+
+      if(char === ' '){
+
+        span.classList.add('space');
+
+        span.innerHTML = '&nbsp;';
+
+      }else{
+
+        span.classList.add('char');
+
+        span.textContent = char;
+
+      }
+
+      // Smooth animation values
+
+      span.currentWeight = 250;
+      span.targetWeight = 250;
+
+      span.currentScale = 1;
+      span.targetScale = 1;
+
+      span.currentY = 0;
+      span.targetY = 0;
+
+      span.currentOpacity = 0.7;
+      span.targetOpacity = 0.7;
+
+      textElement.appendChild(span);
+
+    });
+
+    const chars =
+      document.querySelectorAll('.char');
+
+    let mouseX =
+      window.innerWidth / 2;
+
+    let mouseY =
+      window.innerHeight / 2;
+
+    window.addEventListener('mousemove', e => {
+
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+    });
+
+    function animate(){
+
+      chars.forEach(letter => {
+
+        const rect =
+          letter.getBoundingClientRect();
+
+        const x =
+          rect.left + rect.width / 2;
+
+        const y =
+          rect.top + rect.height / 2;
+
+        const distance =
+          Math.hypot(mouseX - x, mouseY - y);
+
+        const maxDistance = 300;
+
+        let intensity =
+          1 - distance / maxDistance;
+
+        intensity =
+          Math.max(0, Math.min(1, intensity));
+
+        // Targets
+
+        letter.targetWeight =
+          250 + intensity * 650;
+
+        letter.targetScale =
+          1 + intensity * 0.55;
+
+        letter.targetY =
+          intensity * -18;
+
+        letter.targetOpacity =
+          0.5 + intensity * 0.5;
+
+        // Smooth interpolation
+
+        letter.currentWeight +=
+          (letter.targetWeight - letter.currentWeight) * 0.12;
+
+        letter.currentScale +=
+          (letter.targetScale - letter.currentScale) * 0.12;
+
+        letter.currentY +=
+          (letter.targetY - letter.currentY) * 0.12;
+
+        letter.currentOpacity +=
+          (letter.targetOpacity - letter.currentOpacity) * 0.12;
+
+        // Apply styles
+
+        letter.style.fontVariationSettings =
+          `"wght" ${letter.currentWeight}`;
+
+        letter.style.transform = `
+          translateY(${letter.currentY}px)
+          scale(${letter.currentScale})
+        `;
+
+        letter.style.opacity =
+          letter.currentOpacity;
+
+      });
+
+      requestAnimationFrame(animate);
+
+    }
+
+    animate();
+
+  </script>
+
+{% endblock %}

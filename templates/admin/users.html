@@ -1,0 +1,809 @@
+{% extends "admin/base_admin.html" %}
+{% set active_page = 'users' %}
+
+{% block title %}Users{% endblock %}
+{% block heading %}Manage Users{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.users-page{
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.users-hero{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:40px;
+
+    border-radius:34px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.82),
+            rgba(255,255,255,.64)
+        );
+
+    border:1px solid var(--line);
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.05);
+}
+
+.users-hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    border-radius:999px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(107,115,85,.16),
+            transparent 70%
+        );
+
+    top:-90px;
+    right:-80px;
+}
+
+.hero-label{
+    font-size:11px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:16px;
+}
+
+.hero-title{
+    font-family:var(--serif);
+
+    font-size:clamp(42px,5vw,74px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    margin-bottom:18px;
+
+    color:var(--ink);
+}
+
+.hero-title em{
+    font-style:italic;
+
+    color:var(--sage);
+}
+
+.hero-text{
+    max-width:720px;
+
+    color:var(--ink-soft);
+
+    font-size:15px;
+
+    line-height:1.8;
+}
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+.flash-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.flash{
+    padding:14px 18px;
+
+    border-radius:18px;
+
+    font-size:14px;
+
+    animation:fadeUp .5s ease;
+}
+
+.flash-success{
+    background:#edfdf3;
+    color:#067647;
+    border:1px solid #b7ebc6;
+}
+
+.flash-error{
+    background:#fff1f1;
+    color:#b42318;
+    border:1px solid #f5c2c0;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.users-topbar{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:16px;
+
+    flex-wrap:wrap;
+}
+
+.users-count{
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.users-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fill,minmax(320px,1fr));
+
+    gap:24px;
+}
+
+/* =========================================================
+   USER CARD
+========================================================= */
+
+.user-card{
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:26px;
+
+    border-radius:30px;
+
+    background:
+        rgba(255,255,255,.78);
+
+    border:1px solid var(--line);
+
+    backdrop-filter:blur(14px);
+
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+
+    animation:fadeUp .6s ease;
+}
+
+.user-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+        0 22px 44px rgba(0,0,0,.08);
+}
+
+.user-card::before{
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(255,255,255,.92),
+            transparent 40%
+        );
+
+    pointer-events:none;
+}
+
+/* =========================================================
+   USER TOP
+========================================================= */
+
+.user-top{
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    margin-bottom:20px;
+}
+
+.avatar{
+    width:68px;
+    height:68px;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--sage),
+            var(--ink)
+        );
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+
+    font-size:24px;
+
+    font-weight:700;
+
+    flex-shrink:0;
+
+    box-shadow:
+        0 10px 24px rgba(0,0,0,.12);
+}
+
+.user-main{
+    flex:1;
+}
+
+.user-name{
+    font-family:var(--serif);
+
+    font-size:30px;
+
+    line-height:1;
+
+    letter-spacing:-.02em;
+
+    margin-bottom:8px;
+
+    color:var(--ink);
+}
+
+.user-id{
+    font-size:11px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badges{
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:22px;
+}
+
+.badge{
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:10px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    font-weight:700;
+}
+
+.badge-admin{
+    background:#fff4d7;
+    color:#8b5e00;
+}
+
+.badge-customer{
+    background:#e9f9ee;
+    color:#067647;
+}
+
+.badge-active{
+    background:#eef4ff;
+    color:#1d4ed8;
+}
+
+.badge-inactive{
+    background:#fff1f1;
+    color:#b42318;
+}
+
+/* =========================================================
+   DETAILS
+========================================================= */
+
+.user-details{
+    display:flex;
+    flex-direction:column;
+
+    gap:14px;
+
+    margin-bottom:26px;
+}
+
+.detail{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+}
+
+.detail-icon{
+    width:38px;
+    height:38px;
+
+    border-radius:14px;
+
+    background:rgba(107,115,85,.1);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:16px;
+
+    flex-shrink:0;
+}
+
+.detail-text{
+    flex:1;
+}
+
+.detail-label{
+    font-size:10px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:5px;
+}
+
+.detail-value{
+    font-size:14px;
+
+    color:var(--ink-soft);
+
+    line-height:1.6;
+
+    word-break:break-word;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.user-actions{
+    display:flex;
+
+    gap:12px;
+
+    margin-top:auto;
+}
+
+.action-form{
+    flex:1;
+}
+
+.action-btn{
+    width:100%;
+
+    border:none;
+
+    padding:14px 16px;
+
+    border-radius:18px;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    transition:all .25s ease;
+}
+
+.btn-role{
+    background:var(--ink);
+
+    color:white;
+}
+
+.btn-role:hover{
+    background:var(--sage);
+
+    transform:translateY(-2px);
+}
+
+.btn-delete{
+    background:#fff4f4;
+
+    color:#b42318;
+
+    border:1px solid #f4c4c4;
+}
+
+.btn-delete:hover{
+    background:#b42318;
+
+    color:white;
+
+    transform:translateY(-2px);
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-state{
+    text-align:center;
+
+    padding:110px 20px;
+
+    border-radius:34px;
+
+    background:
+        rgba(255,255,255,.78);
+
+    border:1px solid var(--line);
+
+    backdrop-filter:blur(14px);
+}
+
+.empty-state h2{
+    font-family:var(--serif);
+
+    font-size:64px;
+
+    font-weight:400;
+
+    margin-bottom:18px;
+}
+
+.empty-state p{
+    color:var(--muted);
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(24px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .users-hero{
+        padding:28px;
+    }
+
+    .hero-title{
+        font-size:44px;
+    }
+
+    .users-grid{
+        grid-template-columns:1fr;
+    }
+
+    .user-name{
+        font-size:24px;
+    }
+
+    .user-actions{
+        flex-direction:column;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="users-page">
+
+    <!-- HERO -->
+
+    <section class="users-hero">
+
+        <div class="hero-label">
+            Customer Management
+        </div>
+
+        <div class="hero-title">
+            Your community, <em>beautifully organized.</em>
+        </div>
+
+        <div class="hero-text">
+            Manage customers, admins, permissions,
+            and account activity inside your
+            Thread n Things dashboard.
+        </div>
+
+    </section>
+
+    <!-- FLASH -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+
+        <div class="flash-wrap">
+
+            {% for category, message in messages %}
+
+            <div class="flash flash-{{ category }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+    {% endwith %}
+
+    <!-- TOPBAR -->
+
+    <div class="users-topbar">
+
+        <div class="users-count">
+
+            {% if users %}
+                {{ users|length }} User{{ '' if users|length == 1 else 's' }}
+            {% else %}
+                No Users
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- USERS -->
+
+    {% if users %}
+
+    <div class="users-grid">
+
+        {% for user in users %}
+
+        <div class="user-card">
+
+            <!-- TOP -->
+
+            <div class="user-top">
+
+                <div class="avatar">
+                    {{ user.name[0]|upper }}
+                </div>
+
+                <div class="user-main">
+
+                    <div class="user-name">
+                        {{ user.name }}
+                    </div>
+
+                    <div class="user-id">
+                        User #{{ user.id }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- BADGES -->
+
+            <div class="badges">
+
+                <div class="badge badge-{{ user.role|lower }}">
+                    {{ user.role }}
+                </div>
+
+                {% if user.is_active %}
+
+                <div class="badge badge-active">
+                    Active
+                </div>
+
+                {% else %}
+
+                <div class="badge badge-inactive">
+                    Deactivated
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- DETAILS -->
+
+            <div class="user-details">
+
+                <div class="detail">
+
+                    <div class="detail-icon">
+                        ✉️
+                    </div>
+
+                    <div class="detail-text">
+
+                        <div class="detail-label">
+                            Email
+                        </div>
+
+                        <div class="detail-value">
+                            {{ user.email }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="detail">
+
+                    <div class="detail-icon">
+                        📞
+                    </div>
+
+                    <div class="detail-text">
+
+                        <div class="detail-label">
+                            Phone
+                        </div>
+
+                        <div class="detail-value">
+                            {{ user.phone if user.phone else 'Not Provided' }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="detail">
+
+                    <div class="detail-icon">
+                        📅
+                    </div>
+
+                    <div class="detail-text">
+
+                        <div class="detail-label">
+                            Joined
+                        </div>
+
+                        <div class="detail-value">
+                            {{ user.created_at.strftime('%d %b %Y') }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+
+            <div class="user-actions">
+
+                <form
+                    class="action-form"
+                    action="/admin/user/switch/{{ user.id }}/{{ user.role }}"
+                    method="post"
+                >
+
+                    <button
+                        type="submit"
+                        class="action-btn btn-role"
+                    >
+                        Switch Role
+                    </button>
+
+                </form>
+
+                <form
+                    class="action-form"
+                    action="/admin/user/delete/{{ user.id }}"
+                    method="post"
+                    onsubmit="return confirm('Delete {{ user.name }}? This cannot be undone.')"
+                >
+
+                    <button
+                        type="submit"
+                        class="action-btn btn-delete"
+                    >
+                        Delete User
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY -->
+
+    <div class="empty-state">
+
+        <h2>
+            No Users
+        </h2>
+
+        <p>
+            There are currently no registered users.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

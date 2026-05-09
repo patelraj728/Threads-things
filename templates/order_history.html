@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+{% block title %}My Orders — Thread &amp; Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   ORDERS PAGE
+========================================================= */
+
+.orders-page{
+
+    padding:
+        calc(var(--nav-h) + 50px)
+        clamp(20px,5vw,70px)
+        100px;
+
+    min-height:100vh;
+}
+#orders-page{
+    padding: 20vh;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.orders-hero{
+
+    margin-bottom:60px;
+}
+
+.hero-label{
+
+    font-size:11px;
+
+    letter-spacing:.32em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:26px;
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.hero-label::before{
+
+    content:"";
+
+    width:42px;
+    height:1px;
+
+    background:var(--muted);
+}
+
+.orders-hero h1{
+
+    font-family:var(--serif);
+
+    font-weight:300;
+
+    font-size:clamp(54px,8vw,120px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    margin:0 0 18px;
+}
+
+.orders-hero h1 em{
+
+    font-style:italic;
+
+    color:var(--sage);
+}
+
+.orders-sub{
+
+    max-width:560px;
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    color:var(--ink-soft);
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.orders-topbar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:36px;
+}
+
+.back-link{
+
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--ink-soft);
+
+    transition:.25s ease;
+}
+
+.back-link:hover{
+
+    color:var(--ink);
+
+    transform:translateX(-3px);
+}
+
+.orders-count{
+
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+/* =========================================================
+   ORDERS LIST
+========================================================= */
+
+.orders-list{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:22px;
+}
+
+/* =========================================================
+   ORDER CARD
+========================================================= */
+
+.order-card{
+
+    background:
+        rgba(255,255,255,.72);
+
+    border:1px solid var(--line);
+
+    border-radius:28px;
+
+    padding:28px;
+
+    backdrop-filter:blur(16px);
+
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+}
+
+.order-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.06);
+}
+
+/* HEADER */
+
+.order-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    gap:24px;
+
+    flex-wrap:wrap;
+}
+
+.order-left{
+
+    flex:1;
+}
+
+/* ORDER NUMBER */
+
+.order-id{
+
+    font-family:var(--serif);
+
+    font-size:32px;
+
+    line-height:1;
+
+    letter-spacing:-.03em;
+
+    margin-bottom:18px;
+}
+
+/* META GRID */
+
+.order-meta{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
+
+    gap:18px;
+
+    margin-bottom:20px;
+}
+
+.meta-label{
+
+    font-size:10px;
+
+    letter-spacing:.2em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:5px;
+}
+
+.meta-value{
+
+    font-size:15px;
+
+    color:var(--ink-soft);
+}
+
+/* STATUS */
+
+.status{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    font-weight:700;
+}
+
+/* STATUS COLORS */
+
+.status-PLACED{
+    background:#e3f2fd;
+    color:#1976d2;
+}
+
+.status-CONFIRMED{
+    background:#e8f5e9;
+    color:#2e7d32;
+}
+
+.status-PACKED{
+    background:#fff8e1;
+    color:#f57f17;
+}
+
+.status-SHIPPED{
+    background:#e1f5fe;
+    color:#0277bd;
+}
+
+.status-OUT_FOR_DELIVERY{
+    background:#fff3e0;
+    color:#ef6c00;
+}
+
+.status-DELIVERED{
+    background:#dcedc8;
+    color:#33691e;
+}
+
+.status-CANCELLED{
+    background:#ffebee;
+    color:#c62828;
+}
+
+/* MESSAGE */
+
+.custom-message{
+
+    margin-top:18px;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:
+        rgba(255,255,255,.6);
+
+    border:1px solid var(--line);
+}
+
+.custom-message .meta-label{
+
+    margin-bottom:8px;
+}
+
+.custom-message p{
+
+    margin:0;
+
+    font-size:14px;
+
+    line-height:1.7;
+
+    color:var(--ink-soft);
+}
+
+/* BUTTON */
+
+.order-actions{
+
+    display:flex;
+    align-items:flex-start;
+}
+
+.view-btn{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    height:48px;
+
+    padding:0 24px;
+
+    border-radius:999px;
+
+    background:var(--ink);
+
+    color:var(--cream);
+
+    font-size:11px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    transition:all .3s ease;
+}
+
+.view-btn:hover{
+
+    background:var(--sage);
+
+    transform:translateY(-2px);
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state{
+
+    padding:100px 20px;
+
+    text-align:center;
+}
+
+.empty-state h2{
+
+    font-family:var(--serif);
+
+    font-size:clamp(42px,6vw,72px);
+
+    font-weight:300;
+
+    margin-bottom:18px;
+}
+
+.empty-state p{
+
+    color:var(--muted);
+
+    font-size:15px;
+
+    margin-bottom:28px;
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal{
+
+    opacity:0;
+
+    transform:translateY(30px);
+
+    transition:
+        opacity .8s cubic-bezier(.2,.8,.2,1),
+        transform .8s cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal.in{
+
+    opacity:1;
+
+    transform:none;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .orders-page{
+
+        padding:
+            calc(var(--nav-h) + 30px)
+            18px
+            80px;
+    }
+#orders-page{
+    padding: 3vh;
+}
+    .orders-hero{
+
+        margin-bottom:40px;
+    }
+
+    .order-card{
+
+        padding:22px;
+    }
+
+    .order-id{
+
+        font-size:26px;
+    }
+
+    .order-meta{
+
+        grid-template-columns:1fr 1fr;
+    }
+
+    .view-btn{
+
+        width:100%;
+    }
+
+    .order-actions{
+
+        width:100%;
+    }
+}
+
+@media(max-width:520px){
+
+    .orders-hero h1{
+
+        font-size:52px;
+    }
+#orders-page{
+    padding: 2vh;
+}
+    .orders-sub{
+
+        font-size:15px;
+    }
+
+    .order-meta{
+
+        grid-template-columns:1fr;
+    }
+
+    .order-header{
+
+        gap:18px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="orders-page" id="orders-page">
+
+    <!-- HERO -->
+    <div class="orders-hero reveal">
+
+        <div class="hero-label">
+            Purchase History
+        </div>
+
+        <h1>
+            Your <em>orders.</em>
+        </h1>
+
+        <p class="orders-sub">
+            Track every handmade piece you've ordered —
+            from crafting to delivery.
+        </p>
+
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="orders-topbar reveal">
+
+        <a href="/" class="back-link">
+            ← Continue Shopping
+        </a>
+
+        {% if orders %}
+        <div class="orders-count">
+            {{ orders|length }}
+            order{{ '' if orders|length == 1 else 's' }}
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% if orders %}
+
+    <div class="orders-list">
+
+        {% for order in orders %}
+
+        <div class="order-card reveal">
+
+            <div class="order-header">
+
+                <!-- LEFT -->
+                <div class="order-left">
+
+                    <div class="order-id">
+                        Order #{{ order.id }}
+                    </div>
+
+                    <div class="order-meta">
+
+                        <div>
+                            <div class="meta-label">
+                                Date
+                            </div>
+
+                            <div class="meta-value">
+                                {{ order.created_at.strftime('%d %b %Y, %H:%M') }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="meta-label">
+                                Total
+                            </div>
+
+                            <div class="meta-value">
+                                ₹{{ order.total_amount }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="meta-label">
+                                Items
+                            </div>
+
+                            <div class="meta-value">
+                                {% set item_count = order.items|length %}
+                                {{ item_count }}
+                                item{{ 's' if item_count != 1 else '' }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="meta-label">
+                                Status
+                            </div>
+
+                            <div class="meta-value">
+                                <span class="status status-{{ order.status }}">
+                                    {{ order.status.replace('_', ' ') }}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {% if order.custom_message %}
+
+                    <div class="custom-message">
+
+                        <div class="meta-label">
+                            Custom Message
+                        </div>
+
+                        <p>
+                            {{ order.custom_message }}
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="order-actions">
+
+                    <a
+                        href="/order/{{ order.id }}"
+                        class="view-btn"
+                    >
+                        View Details
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY -->
+    <div class="empty-state reveal">
+
+        <h2>
+            No Orders Yet
+        </h2>
+
+        <p>
+            You haven’t placed any handmade orders yet.
+        </p>
+
+        <a href="/product/shop" class="btn btn-dark">
+            Explore Collection
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const observer = new IntersectionObserver((entries)=>{
+
+    entries.forEach(entry=>{
+
+        if(entry.isIntersecting){
+
+            entry.target.classList.add('in');
+        }
+
+    });
+
+},{
+    threshold:.12
+});
+
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+
+    el.style.transitionDelay =
+        `${(i % 4) * 0.08}s`;
+
+    observer.observe(el);
+
+});
+
+</script>
+{% endblock %}

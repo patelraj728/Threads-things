@@ -1,0 +1,962 @@
+{% extends "base.html" %}
+
+{% block title %}Thread &amp; Things — Handmade with love{% endblock %}
+
+{% block head_extra %}
+<style>
+/* ========== ROOT VARIABLES ========== */
+/* (Assuming these are defined in base.html - kept here for reference) */
+/* --nav-h, --serif, --muted, --ink, --ink-soft, --sage, --cream, --cream-2, --taupe, --line */
+ 
+/* ========== RESET & BASE ========== */
+* { box-sizing: border-box; }
+ 
+/* ========== HERO SECTION ========== */
+.hero {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+ 
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+}
+ 
+.hero-label::before {
+  content: "";
+  width: 42px;
+  height: 1px;
+  background: var(--muted);
+}
+ 
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(48px, 10vw, 148px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin: 0 0 36px;
+  color: var(--ink);
+}
+ 
+.hero h1 .line {
+  display: block;
+  overflow: hidden;
+}
+ 
+.hero h1 .line span {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+ 
+.hero.loaded h1 .line span {
+  transform: translateY(0);
+}
+ 
+.hero h1 .line:nth-child(2) span {
+  transition-delay: 0.12s;
+}
+ 
+.hero h1 .line:nth-child(3) span {
+  transition-delay: 0.24s;
+}
+ 
+.hero h1 em {
+  font-style: italic;
+  color: var(--sage);
+  font-weight: 400;
+}
+ 
+.hero-sub {
+  max-width: 520px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  opacity: 0;
+  margin-left: 1%;
+  transform: translateY(20px);
+  transition: all 0.8s ease 0.6s;
+}
+ 
+.hero.loaded .hero-sub {
+  opacity: 1;
+  transform: none;
+}
+ 
+/* Scroll Indicator */
+.scroll-ind {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.6s ease 1.2s;
+}
+ 
+.hero.loaded .scroll-ind {
+  opacity: 1;
+}
+ 
+.scroll-ind::after {
+  content: "";
+  width: 1px;
+  height: 36px;
+  background: var(--muted);
+  animation: scrollDot 2s ease-in-out infinite;
+}
+ 
+/* Hero Stack Cards */
+.hero-stack {
+  position: absolute;
+  right: clamp(20px, 6vw, 80px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  height: 380px;
+  z-index: 2;
+  margin-right: 50px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+ 
+.stack-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--cream-2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+ 
+.stack-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+ 
+.c1 { transform: translate(0, 0) rotate(-2deg); z-index: 3; }
+.c2 { transform: translate(18px, 18px) rotate(2deg); z-index: 2; }
+.c3 { transform: translate(36px, 36px) rotate(-1deg); z-index: 1; }
+ 
+.hero-stack:hover .c1 { transform: translate(-40px, -10px) rotate(-5deg); }
+.hero-stack:hover .c2 { transform: translate(40px, 10px) rotate(3deg); }
+.hero-stack:hover .c3 { transform: translate(80px, 30px) rotate(6deg); }
+ 
+@media (max-width: 900px) {
+  .hero-stack { display: none; }
+}
+ 
+/* ========== MARQUEE ========== */
+.marquee {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+  overflow: hidden;
+  background: var(--cream-2);
+}
+ 
+.marquee-track {
+  display: flex;
+  gap: 60px;
+  white-space: nowrap;
+  animation: marquee 38s linear infinite;
+  width: max-content;
+}
+ 
+.marquee span {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+ 
+.marquee span::after {
+  content: "·";
+  margin-left: 60px;
+  color: var(--sage);
+}
+ 
+/* ========== SHOP SECTION ========== */
+.category-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+  margin-left: 2vw;
+}
+ 
+.category-filters a {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  transition: all 0.25s;
+  text-decoration: none;
+  cursor: pointer;
+}
+ 
+.category-filters a:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+ 
+.category-filters a.active {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+ 
+/* ========== PRODUCT GRID & CARDS ========== */
+.section-head{
+    font-style: var(--serif);
+    color: var(--sage);
+    font-weight: 400;
+    margin: 10px 0 10px 4vw;
+}
+.product-grid {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 80px 40px;
+}
+ 
+.product-card {
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+ 
+.product-card.in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+ 
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+ 
+/* Product Media & Image */
+.product-media {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cream-2);
+  aspect-ratio: 4 / 5;
+  margin-bottom: 14px;
+}
+ 
+.product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s ease;
+}
+ 
+.product-card:hover .product-media img {
+  transform: scale(1.06);
+}
+ 
+.product-media .ph {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--cream-2), var(--taupe));
+}
+ 
+/* Badge (In Stock / Sold Out) */
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--ink);
+}
+ 
+.badge.out {
+  background: rgba(28, 28, 26, 0.85);
+  color: var(--cream);
+}
+ 
+/* Product Info */
+.product-info {
+  margin-bottom: 12px;
+}
+ 
+.product-cat {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+ 
+.product-info h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 20px;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+ 
+.price {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--sage);
+  margin: 0 0 16px;
+}
+ 
+/* Product Actions (Buttons) */
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+ 
+.btn {
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+ 
+.btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+ 
+.btn-dark {
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+}
+ 
+.btn-dark:hover {
+  background: var(--sage);
+}
+ 
+.btn.full {
+  width: 100%;
+  text-align: center;
+}
+ /* =========================================================
+   VIEW ALL BUTTON
+========================================================= */
+
+.view-all-wrap{
+
+  display:flex;
+  justify-content:center;
+  margin-bottom: 100px;
+  margin-top:70px;
+}
+
+.view-all-btn{
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:16px 34px;
+
+  border-radius:999px;
+
+  background:var(--ink);
+  color:var(--cream);
+
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+
+  transition:all .3s ease;
+}
+.view-all-btn:hover{
+
+  background:var(--sage);
+
+  transform:translateY(-2px);
+}
+/* ========== INFINITE SCROLL SECTION ========== */
+.scroll-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  mask: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+ 
+.scroll-container.in {
+  opacity: 1;
+  transform: none;
+}
+ 
+.infinite-scroll {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: scroll-right 25s linear infinite;
+}
+ 
+.image-item {
+  flex-shrink: 0;
+  width: 220px;
+  height: 260px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cream-2);
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+ 
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+ 
+.image-item:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+ 
+@media (min-width: 768px) {
+  .image-item { width: 260px; height: 320px; }
+}
+ 
+@media (min-width: 1024px) {
+  .image-item { width: 300px; height: 360px; }
+}
+ 
+/* ========== CTA SECTION ========== */
+.cta-threads {
+  padding: 120px 20px;
+  background: var(--cream);
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+ 
+.cta-inner {
+  max-width: 720px;
+  position: relative;
+}
+ 
+.cta-canvas {
+  width: 100%;
+  height: 180px;
+  display: block;
+  margin-bottom: 20px;
+}
+ 
+.cta-threads h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(42px, 7vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  color: var(--ink);
+}
+ 
+.cta-threads h1 .line {
+  display: block;
+  overflow: hidden;
+}
+ 
+.cta-threads h1 .line span {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+ 
+.cta-threads.in h1 .line span {
+  transform: translateY(0);
+}
+ 
+.cta-threads h1 .line:nth-child(2) span {
+  transition-delay: 0.15s;
+}
+ 
+.cta-threads h1 em {
+  font-style: italic;
+  color: var(--sage);
+}
+ 
+.cta-threads p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 36px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease 0.4s;
+}
+ 
+.cta-threads.in p {
+  opacity: 1;
+  transform: none;
+}
+ 
+.cta-btn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--cream);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+ 
+.cta-btn:hover {
+  background: var(--sage);
+}
+ 
+/* ========== KEYFRAME ANIMATIONS ========== */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+ 
+@keyframes scrollDot {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+ 
+@keyframes scroll-right {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+ 
+/* ========== RESPONSIVE ========== */
+@media (max-width: 860px) {
+  .about {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+ 
+@media (max-width: 768px) {
+  .hero{
+    min-height: 55vh;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .hero-sub{
+    padding: 0 5%;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 8vw, 80px);
+  }
+ 
+  .marquee span {
+    font-size: 24px;
+  }
+ 
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 40px 20px;
+    padding: 10px;
+  }
+ 
+  .cta-threads {
+    padding: 80px 15px;
+  }
+ 
+  .cta-threads h1 {
+    font-size: clamp(28px, 6vw, 64px);
+  }
+}
+</style>
+ 
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-label">Est. 2024 — Handmade in India</div>
+  <h1>
+    <span class="line"><span>Crafted slowly,</span></span>
+    <span class="line"><span><em>thread by thread.</em></span></span>
+    <span class="line"><span>Made for keeping.</span></span>
+  </h1>
+  <p class="hero-sub">
+    {% if session.email %}Welcome back, {{ session.email }}. {% endif %}
+    Every keychain, bag and cap is hand-made to order — small batches, considered
+    materials, and a quiet attention to the things you carry every day.
+  </p>
+  <div class="scroll-ind">Scroll</div>
+</section>
+
+<!-- ===== MARQUEE ===== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Considered</span><span>Crafted</span><span>Timeless</span><span>Handmade</span>
+    <span>Considered</span><span>Crafted</span><span>Timeless</span><span>Handmade</span>
+  </div>
+</div>
+
+<!-- ===== SHOP ===== -->
+<section class="section" id="shop">
+  <div class="section-head reveal">
+    <div>
+      <div class="eyebrow">The Collection</div>
+      <h2>Pieces, <em>quietly made.</em></h2>
+    </div>
+    
+  </div>
+
+  <div class="category-filters reveal">
+    <a href="/" class="{% if not selected_category %}active{% endif %}">All</a>
+    {% for cat in categories %}
+      <a href="/?category={{ cat.id }}" class="{% if selected_category == cat.id %}active{% endif %}">
+        {{ cat.name }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if products %}
+  <ul class="product-grid">
+    {% for product in products %}
+    <li class="product-card">
+
+  <a href="/product/{{ product.id }}" class="card-link">
+
+    <div class="product-media">
+      {% if product.images %}
+        <img src="{{ url_for('static', filename=product.images[0].image_url) }}"
+             alt="{{ product.name }}" loading="lazy">
+      {% else %}
+        <div class="ph"></div>
+      {% endif %}
+
+      {% if product.stock_quantity > 0 %}
+        <span class="badge">In stock</span>
+      {% else %}
+        <span class="badge out">Sold out</span>
+      {% endif %}
+    </div>
+
+    <div class="product-info">
+      <p class="product-cat">{{ product.category.name }}</p>
+      <h3>{{ product.name }}</h3>
+      <p class="price">₹{{ product.price }}</p>
+    </div>
+
+  </a>
+
+  <!-- Buttons OUTSIDE link -->
+  <div class="actions">
+
+    {% if session.user_id and product.stock_quantity > 0 %}
+    <form
+  action="/cart/add/{{ product.id }}"
+  method="POST"
+  class="ajax-cart-form"
+>
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn">Add to cart</button>
+    </form>
+    {% endif %}
+
+    {% if product.stock_quantity > 0 %}
+    <a href="{{ url_for('order.checkout', buy_now=product.id, quantity=1) }}"
+       class="btn btn-dark">Buy now</a>
+    {% endif %}
+
+  </div>
+
+</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="empty">No products yet.</p>
+  {% endif %}
+  <div class="view-all-wrap reveal">
+
+  <a href="/product/shop" class="view-all-btn">
+    View Full Collection
+  </a>
+
+</div>
+</section>
+
+<!-- infinite-scroll -->
+ <section class="section reveal" style="background: var(--cream); overflow:hidden;">
+  
+  <div class="scroll-container">
+    <div class="infinite-scroll" id="scrollTrack"></div>
+  </div>
+
+</section>
+
+
+<!-- ===== CTA ===== -->
+<section class="cta-threads reveal">
+  <div class="cta-inner">
+
+    <!-- 🎯 Particle Canvas -->
+    <canvas id="ctaCanvas" class="cta-canvas"></canvas>
+    <h1 class="atend">Find something, worth keeping.</h1>
+    
+    <p>
+      Small-batch pieces, shaped by hand and time —
+      designed to be carried, worn, and kept.
+    </p>
+
+    <a href="/product/shop" class="cta-btn">Explore Collection</a>
+  </div>
+</section>
+<script>
+/* ========== INTERSECTION OBSERVER (Scroll Reveal) ========== */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+    } else {
+      entry.target.classList.remove('in');
+    }
+  });
+}, { threshold: 0.15 });
+ 
+/* ========== HERO LOAD ANIMATION ========== */
+window.addEventListener('load', () => {
+  document.getElementById('hero').classList.add('loaded');
+  const heroStack = document.querySelector('.hero-stack');
+  if (heroStack) {
+    heroStack.style.opacity = '1';
+  }
+});
+ 
+/* ========== PRODUCT CARDS & REVEALS ========== */
+document.querySelectorAll('.product-card').forEach((card, i) => {
+  card.style.transitionDelay = (i % 4) * 0.08 + 's';
+  observer.observe(card);
+});
+ 
+/* ========== REVEAL SECTIONS (CTA, Image Scroll, etc.) ========== */
+document.querySelectorAll('.reveal, .scroll-container').forEach(el => {
+  observer.observe(el);
+});
+ 
+/* ========== AJAX FORM SUBMISSION (Add to Cart / Buy) ========== */
+document.querySelectorAll('form.ajax-form').forEach(form => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+ 
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+ 
+      btn.innerHTML = res.ok ? '✓' : '!';
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.disabled = false;
+      }, 1300);
+    } catch (err) {
+      console.error('Form submission error:', err);
+      btn.innerHTML = '!';
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.disabled = false;
+      }, 1300);
+    }
+  });
+});
+ 
+/* ========== INFINITE IMAGE SCROLL ========== */
+const images = [
+  "https://images.unsplash.com/photo-1518495973542-4542c06a5843",
+  "https://images.unsplash.com/photo-1472396961693-142e6e269027",
+  "https://images.unsplash.com/photo-1505142468610-359e7d316be0",
+  "https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151",
+  "https://plus.unsplash.com/premium_photo-1673264933212-d78737f38e48",
+  "https://plus.unsplash.com/premium_photo-1711434824963-ca894373272e",
+  "https://plus.unsplash.com/premium_photo-1675705721263-0bbeec261c49",
+  "https://images.unsplash.com/photo-1524799526615-766a9833dec0"
+];
+ 
+const track = document.getElementById("scrollTrack");
+ 
+if (track) {
+  const duplicated = [...images, ...images];
+ 
+  duplicated.forEach((src) => {
+    const div = document.createElement("div");
+    div.className = "image-item";
+ 
+    const img = document.createElement("img");
+    img.src = src + "?q=80&w=1200&auto=format&fit=crop";
+    img.loading = "lazy";
+ 
+    div.appendChild(img);
+    track.appendChild(div);
+  });
+}
+ 
+/* ========== PARTICLE CANVAS (CTA Section) ========== */
+const canvas = document.getElementById("ctaCanvas");
+ 
+if (canvas) {
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  let mouse = { x: null, y: null };
+ 
+  const config = {
+    text: "Threads & Things",
+    fontSize: 50,
+    fontFamily: "'DM Serif Display', serif",
+    particleSize: 2,
+    particleColor: "#0f0f0f",
+    particleDensity: 4,
+  };
+ 
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    init();
+  }
+ 
+  function init() {
+    particles = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+    ctx.font = `bold ${config.fontSize}px ${config.fontFamily}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowColor = "rgba(0,0,0,0.15)";
+    ctx.shadowBlur = 8;
+ 
+    const x = canvas.width / 2;
+    const y = canvas.height / 2;
+ 
+    ctx.fillText(config.text, x, y);
+ 
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+ 
+    for (let y = 0; y < canvas.height; y += config.particleDensity) {
+      for (let x = 0; x < canvas.width; x += config.particleDensity) {
+        const i = (y * canvas.width + x) * 4;
+        const alpha = imageData.data[i + 3];
+ 
+        if (alpha > 128) {
+          particles.push({
+            x,
+            y,
+            baseX: x,
+            baseY: y,
+          });
+        }
+      }
+    }
+  }
+ 
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+    particles.forEach(p => {
+      let dx = 0, dy = 0;
+ 
+      if (mouse.x !== null) {
+        const distX = mouse.x - p.x;
+        const distY = mouse.y - p.y;
+        const dist = Math.sqrt(distX * distX + distY * distY);
+ 
+        if (dist < 120 && dist > 0) {
+          dx = (distX / dist) * 3;
+          dy = (distY / dist) * 3;
+        }
+      }
+ 
+      p.x += dx + (p.baseX - p.x) * 0.06;
+      p.y += dy + (p.baseY - p.y) * 0.06;
+ 
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, config.particleSize, 0, Math.PI * 2);
+      ctx.fillStyle = config.particleColor;
+      ctx.fill();
+    });
+ 
+    requestAnimationFrame(animate);
+  }
+ 
+  function handleMouseMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  }
+ 
+  function handleMouseLeave() {
+    mouse.x = null;
+    mouse.y = null;
+  }
+ 
+  window.addEventListener("resize", resize);
+  canvas.addEventListener("mousemove", handleMouseMove);
+  canvas.addEventListener("mouseleave", handleMouseLeave);
+ 
+  resize();
+  animate();
+}
+</script>
+{% endblock %}

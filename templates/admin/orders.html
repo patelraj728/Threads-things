@@ -1,0 +1,981 @@
+{% extends "admin/base_admin.html" %}
+{% set active_page = 'orders' %}
+
+{% block title %}Orders{% endblock %}
+{% block heading %}Orders Management{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.orders-page{
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.orders-hero{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.82),
+            rgba(255,255,255,.62)
+        );
+
+    border:1px solid var(--line);
+
+    border-radius:32px;
+
+    padding:38px;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.05);
+}
+
+.orders-hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    border-radius:999px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(107,115,85,.18),
+            transparent 70%
+        );
+
+    top:-80px;
+    right:-80px;
+}
+
+.hero-label{
+    font-size:11px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:16px;
+}
+
+.orders-title{
+    font-family:var(--serif);
+
+    font-size:clamp(42px,5vw,74px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    margin-bottom:18px;
+
+    color:var(--ink);
+}
+
+.orders-title em{
+    font-style:italic;
+    color:var(--sage);
+}
+
+.hero-text{
+    max-width:720px;
+
+    color:var(--ink-soft);
+
+    line-height:1.8;
+
+    font-size:15px;
+}
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+.flash-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.flash{
+    padding:14px 18px;
+
+    border-radius:16px;
+
+    font-size:14px;
+}
+
+.flash-success{
+    background:#e9f8ee;
+    color:#1f6b34;
+}
+
+.flash-error{
+    background:#fdecec;
+    color:#8a1f1f;
+}
+
+.flash-info{
+    background:#eef7ff;
+    color:#17557c;
+}
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.filters a{
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    border:1px solid var(--line);
+
+    background:white;
+
+    font-size:12px;
+
+    letter-spacing:.12em;
+
+    text-transform:uppercase;
+
+    color:var(--ink-soft);
+
+    transition:all .25s ease;
+}
+
+.filters a:hover{
+    background:var(--ink);
+    color:white;
+    border-color:var(--ink);
+}
+
+.filters a.active{
+    background:var(--ink);
+    color:white;
+    border-color:var(--ink);
+}
+
+/* =========================================================
+   ORDER CARD
+========================================================= */
+
+.order-card{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        rgba(255,255,255,.76);
+
+    border:1px solid var(--line);
+
+    border-radius:30px;
+
+    padding:30px;
+
+    backdrop-filter:blur(16px);
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+
+    animation:fadeUp .6s ease;
+}
+
+.order-card:hover{
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.06);
+}
+
+.order-top{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:26px;
+}
+
+.order-id{
+    font-family:var(--serif);
+
+    font-size:34px;
+
+    line-height:1;
+
+    margin-bottom:10px;
+}
+
+.order-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+
+    font-size:13px;
+
+    color:var(--muted);
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-pill{
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+}
+
+.status-PLACED{
+    background:#e0edff;
+    color:#2158b4;
+}
+
+.status-CONFIRMED{
+    background:#def8e8;
+    color:#146c43;
+}
+
+.status-PACKED{
+    background:#fff3d9;
+    color:#9a6700;
+}
+
+.status-SHIPPED{
+    background:#dff8ff;
+    color:#0e7490;
+}
+
+.status-OUT_FOR_DELIVERY{
+    background:#ffedd5;
+    color:#b45309;
+}
+
+.status-DELIVERED{
+    background:#dff7df;
+    color:#166534;
+}
+
+.status-CANCELLED{
+    background:#ffe1e1;
+    color:#991b1b;
+}
+
+/* =========================================================
+   STATUS TRACK
+========================================================= */
+
+.status-track-wrap{
+    margin:28px 0 34px;
+}
+
+.status-track{
+    position:relative;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:10px;
+}
+
+.status-track::before{
+    content:"";
+
+    position:absolute;
+
+    top:16px;
+    left:0;
+
+    width:100%;
+    height:3px;
+
+    background:#e5e7eb;
+
+    z-index:1;
+}
+
+.status-progress{
+    position:absolute;
+
+    top:16px;
+    left:0;
+
+    height:3px;
+
+    background:linear-gradient(
+        90deg,
+        var(--sage),
+        var(--ink)
+    );
+
+    z-index:2;
+
+    border-radius:999px;
+
+    transition:width .6s ease;
+}
+
+.step{
+    position:relative;
+
+    z-index:3;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    flex:1;
+
+    text-align:center;
+}
+
+.step-dot{
+    width:34px;
+    height:34px;
+
+    border-radius:50%;
+
+    background:white;
+
+    border:3px solid #d1d5db;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    transition:all .35s ease;
+}
+
+.step.active .step-dot{
+    border-color:var(--sage);
+
+    background:var(--sage);
+
+    color:white;
+
+    box-shadow:
+        0 0 0 8px rgba(107,115,85,.12);
+}
+
+.step-label{
+    margin-top:12px;
+
+    font-size:11px;
+
+    letter-spacing:.1em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    line-height:1.5;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.order-grid{
+    display:grid;
+
+    grid-template-columns:
+        1.4fr .9fr;
+
+    gap:24px;
+
+    margin-top:24px;
+}
+
+.panel{
+    background:white;
+
+    border:1px solid var(--line);
+
+    border-radius:22px;
+
+    padding:24px;
+}
+
+.panel-title{
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:18px;
+}
+
+/* =========================================================
+   NOTES
+========================================================= */
+
+.note-box{
+    padding:16px;
+
+    border-radius:16px;
+
+    margin-bottom:14px;
+
+    line-height:1.7;
+
+    font-size:14px;
+}
+
+.customer-note{
+    background:#edf7ff;
+
+    border-left:4px solid #2196F3;
+}
+
+.item-note{
+    background:#fff7e2;
+
+    border-left:4px solid #f59e0b;
+}
+
+.note-box strong{
+    display:block;
+
+    margin-bottom:8px;
+}
+
+/* =========================================================
+   UPDATE FORM
+========================================================= */
+
+.status-form{
+    display:flex;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+    margin-top:26px;
+}
+
+.status-form select{
+    flex:1;
+
+    min-width:240px;
+
+    border:1px solid var(--line);
+
+    background:white;
+
+    border-radius:16px;
+
+    padding:14px 16px;
+
+    font-family:var(--sans);
+
+    outline:none;
+}
+
+.btn-update{
+    border:none;
+
+    background:var(--ink);
+
+    color:white;
+
+    padding:14px 22px;
+
+    border-radius:16px;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    transition:.25s ease;
+}
+
+.btn-update:hover{
+    background:var(--sage);
+}
+
+/* =========================================================
+   ACTION LINK
+========================================================= */
+
+.view-link{
+    display:inline-flex;
+
+    margin-top:18px;
+
+    font-size:12px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    color:var(--ink);
+
+    border-bottom:1px solid var(--ink);
+
+    padding-bottom:3px;
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty{
+    text-align:center;
+
+    padding:100px 20px;
+
+    background:white;
+
+    border:1px solid var(--line);
+
+    border-radius:32px;
+}
+
+.empty h2{
+    font-family:var(--serif);
+
+    font-size:58px;
+
+    font-weight:400;
+
+    margin-bottom:16px;
+}
+
+.empty p{
+    color:var(--muted);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:900px){
+
+    .order-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:768px){
+
+    .orders-hero{
+        padding:28px;
+    }
+
+    .order-card{
+        padding:22px;
+    }
+
+    .order-id{
+        font-size:28px;
+    }
+
+    .status-track{
+        overflow-x:auto;
+
+        padding-bottom:8px;
+    }
+
+    .step{
+        min-width:90px;
+    }
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(24px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="orders-page">
+
+    <!-- HERO -->
+
+    <section class="orders-hero">
+
+        <div class="hero-label">
+            Admin Control
+        </div>
+
+        <div class="orders-title">
+            Orders, <em>beautifully managed.</em>
+        </div>
+
+        <div class="hero-text">
+            Track every customer order, update statuses,
+            manage deliveries, and monitor handmade orders
+            from one elegant dashboard.
+        </div>
+
+    </section>
+
+    <!-- FLASH -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+
+        <div class="flash-wrap">
+
+            {% for category, message in messages %}
+
+            <div class="flash flash-{{ category }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+    {% endwith %}
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <a href="/admin/orders"
+           {% if not status_filter %}class="active"{% endif %}>
+           All
+        </a>
+
+        {% for s in ['PLACED','CONFIRMED','PACKED','SHIPPED','OUT_FOR_DELIVERY','DELIVERED','CANCELLED'] %}
+
+        <a href="/admin/orders?status={{ s }}"
+           {% if status_filter == s %}class="active"{% endif %}>
+
+           {{ s.replace('_',' ') }}
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- ORDERS -->
+
+    {% if orders %}
+
+        {% for order in orders %}
+
+        {% set progress = {
+            'PLACED': '0%',
+            'CONFIRMED': '20%',
+            'PACKED': '40%',
+            'SHIPPED': '60%',
+            'OUT_FOR_DELIVERY': '80%',
+            'DELIVERED': '100%',
+            'CANCELLED': '100%'
+        } %}
+
+        <section class="order-card">
+
+            <!-- TOP -->
+
+            <div class="order-top">
+
+                <div>
+
+                    <div class="order-id">
+                        Order #{{ order.id }}
+                    </div>
+
+                    <div class="order-meta">
+
+                        <span>
+                            👤 {{ order.user.name }}
+                        </span>
+
+                        <span>
+                            ✉ {{ order.user.email }}
+                        </span>
+
+                        <span>
+                            🗓 {{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                        </span>
+
+                        <span>
+                            🧾 {{ order.items|length }} item(s)
+                        </span>
+
+                        <span>
+                            ₹{{ order.total_amount }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="status-pill status-{{ order.status }}">
+                    {{ order.status.replace('_',' ') }}
+                </div>
+
+            </div>
+
+            <!-- STATUS TRACK -->
+
+            <div class="status-track-wrap">
+
+                <div class="status-track">
+
+                    <div class="status-progress"
+                         style="width: {{ progress[order.status] }};">
+                    </div>
+
+                    {% for s, icon in [
+                        ('PLACED','🛒'),
+                        ('CONFIRMED','✔'),
+                        ('PACKED','📦'),
+                        ('SHIPPED','🚚'),
+                        ('OUT_FOR_DELIVERY','📍'),
+                        ('DELIVERED','🎉')
+                    ] %}
+
+                    <div class="step
+                        {% if order.status == s
+                        or (
+                        order.status == 'CONFIRMED' and s == 'PLACED'
+                        ) or (
+                        order.status == 'PACKED' and s in ['PLACED','CONFIRMED']
+                        ) or (
+                        order.status == 'SHIPPED' and s in ['PLACED','CONFIRMED','PACKED']
+                        ) or (
+                        order.status == 'OUT_FOR_DELIVERY' and s in ['PLACED','CONFIRMED','PACKED','SHIPPED']
+                        ) or (
+                        order.status == 'DELIVERED'
+                        )
+                        %}
+                        active
+                        {% endif %}
+                    ">
+
+                        <div class="step-dot">
+                            {{ icon }}
+                        </div>
+
+                        <div class="step-label">
+                            {{ s.replace('_',' ') }}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- GRID -->
+
+            <div class="order-grid">
+
+                <!-- LEFT -->
+
+                <div class="panel">
+
+                    <div class="panel-title">
+                        Shipping Details
+                    </div>
+
+                    <p>
+                        <strong>{{ order.full_name }}</strong>
+                    </p>
+
+                    <p>
+                        {{ order.address }}
+                    </p>
+
+                    <p>
+                        {{ order.city }},
+                        {{ order.state }}
+                    </p>
+
+                    <p>
+                        {{ order.phone }}
+                    </p>
+
+                    <br>
+
+                    {% if order.custom_message %}
+
+                    <div class="note-box customer-note">
+
+                        <strong>
+                            📝 Customer Message
+                        </strong>
+
+                        {{ order.custom_message }}
+
+                    </div>
+
+                    {% endif %}
+
+                    {% if order.items %}
+
+                        {% for item in order.items %}
+
+                            {% if item.custom_notes %}
+
+                            <div class="note-box item-note">
+
+                                <strong>
+                                    📌 {{ item.product.name }}
+                                </strong>
+
+                                {{ item.custom_notes }}
+
+                            </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+                <!-- RIGHT -->
+
+                <div class="panel">
+
+                    <div class="panel-title">
+                        Update Order
+                    </div>
+
+                    <form
+                        action="/admin/orders/{{ order.id }}/status"
+                        method="post"
+                        class="status-form"
+                    >
+
+                        <select name="status">
+
+                            {% for s in [
+                                'PLACED',
+                                'CONFIRMED',
+                                'PACKED',
+                                'SHIPPED',
+                                'OUT_FOR_DELIVERY',
+                                'DELIVERED',
+                                'CANCELLED'
+                            ] %}
+
+                            <option
+                                value="{{ s }}"
+                                {% if order.status == s %}selected{% endif %}
+                            >
+                                {{ s.replace('_',' ') }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <button type="submit" class="btn-update">
+                            Update
+                        </button>
+
+                    </form>
+
+                    <a href="/order/{{ order.id }}" class="view-link">
+                        View Full Order →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {% endfor %}
+
+    {% else %}
+
+    <div class="empty">
+
+        <h2>
+            No Orders
+        </h2>
+
+        <p>
+            No orders were found for this filter.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

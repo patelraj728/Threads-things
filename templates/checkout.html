@@ -1,0 +1,932 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Thread & Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.checkout-page{
+    padding:
+        calc(var(--nav-h) + 40px)
+        clamp(18px,5vw,80px)
+        100px;
+
+    min-height:100vh;
+}
+#checkout-page{
+        padding: 20vh;
+    }
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.checkout-hero{
+    margin-bottom:50px;
+}
+
+.hero-label{
+    font-size:11px;
+
+    letter-spacing:.28em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:18px;
+}
+
+.checkout-title{
+    font-family:var(--serif);
+
+    font-size:clamp(48px,7vw,100px);
+
+    line-height:.92;
+
+    letter-spacing:-.05em;
+
+    margin-bottom:20px;
+
+    color:var(--ink);
+}
+
+.checkout-title em{
+    font-style:italic;
+
+    color:var(--sage);
+}
+
+.checkout-sub{
+    max-width:620px;
+
+    color:var(--ink-soft);
+
+    font-size:15px;
+
+    line-height:1.8;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.checkout-layout{
+    display:grid;
+
+    grid-template-columns:
+        1fr 420px;
+
+    gap:34px;
+
+    align-items:start;
+}
+
+@media(max-width:1050px){
+
+    .checkout-layout{
+        grid-template-columns:1fr;
+    }
+}
+
+/* =========================================================
+   GLASS CARD
+========================================================= */
+
+.glass-card{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.84),
+            rgba(255,255,255,.68)
+        );
+
+    border:1px solid var(--line);
+
+    border-radius:34px;
+
+    padding:34px;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.05);
+}
+
+/* =========================================================
+   SECTION TITLE
+========================================================= */
+
+.section-title{
+    font-family:var(--serif);
+
+    font-size:34px;
+
+    letter-spacing:-.03em;
+
+    margin-bottom:24px;
+
+    color:var(--ink);
+}
+
+/* =========================================================
+   SAVED ADDRESS
+========================================================= */
+
+.saved-title{
+    font-size:11px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:18px;
+}
+
+.address-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+
+    margin-bottom:34px;
+}
+
+.saved-addr{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+    padding:22px;
+
+    border-radius:24px;
+
+    border:1px solid var(--line);
+
+    background:rgba(255,255,255,.65);
+
+    cursor:pointer;
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+.saved-addr:hover{
+
+    transform:translateY(-2px);
+
+    border-color:var(--sage);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.06);
+}
+
+.saved-addr input{
+    margin-top:4px;
+}
+
+.addr-content{
+    flex:1;
+}
+
+.addr-name{
+    font-weight:600;
+
+    margin-bottom:8px;
+
+    color:var(--ink);
+}
+
+.addr-text{
+    color:var(--ink-soft);
+
+    line-height:1.7;
+
+    font-size:14px;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form-grid{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.form-group.full{
+    grid-column:1 / -1;
+}
+
+.form-label{
+    font-size:11px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+.input,
+textarea{
+    width:100%;
+
+    border:1px solid var(--line);
+
+    background:rgba(255,255,255,.75);
+
+    border-radius:18px;
+
+    padding:16px 18px;
+
+    outline:none;
+
+    font-family:var(--sans);
+
+    font-size:14px;
+
+    color:var(--ink);
+
+    transition:
+        border-color .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease;
+}
+
+.input:focus,
+textarea:focus{
+
+    border-color:var(--sage);
+
+    box-shadow:
+        0 0 0 4px rgba(107,115,85,.12);
+
+    transform:translateY(-1px);
+}
+
+textarea{
+    resize:vertical;
+
+    min-height:120px;
+}
+
+/* =========================================================
+   SAVE ADDRESS
+========================================================= */
+
+.save-check{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-top:8px;
+
+    color:var(--ink-soft);
+
+    font-size:14px;
+}
+
+/* =========================================================
+   ITEM NOTES
+========================================================= */
+
+.item-notes{
+    margin-top:48px;
+}
+
+.note-box{
+    padding:20px;
+
+    border-radius:22px;
+
+    border:1px solid var(--line);
+
+    background:rgba(255,255,255,.55);
+
+    margin-bottom:18px;
+}
+
+.note-product{
+    font-weight:600;
+
+    margin-bottom:12px;
+
+    color:var(--ink);
+}
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+.payment-options{
+    display:flex;
+    flex-direction:column;
+
+    gap:16px;
+
+    margin-top:24px;
+}
+
+.payment-option{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+    padding:22px;
+
+    border-radius:24px;
+
+    border:1px solid var(--line);
+
+    background:rgba(255,255,255,.65);
+
+    cursor:pointer;
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+.payment-option:hover{
+
+    transform:translateY(-2px);
+
+    border-color:var(--sage);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.05);
+}
+
+.payment-title{
+    font-weight:600;
+
+    margin-bottom:4px;
+}
+
+.payment-sub{
+    font-size:13px;
+
+    color:var(--muted);
+
+    line-height:1.6;
+}
+
+/* =========================================================
+   ORDER SUMMARY
+========================================================= */
+
+.summary-card{
+    position:sticky;
+
+    top:calc(var(--nav-h) + 20px);
+}
+
+.summary-title{
+    font-family:var(--serif);
+
+    font-size:38px;
+
+    margin-bottom:30px;
+}
+
+.summary-items{
+    display:flex;
+    flex-direction:column;
+
+    gap:18px;
+}
+
+.summary-item{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:16px;
+
+    padding-bottom:18px;
+
+    border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.item-name{
+    color:var(--ink-soft);
+
+    line-height:1.6;
+}
+
+.item-price{
+    font-weight:600;
+
+    white-space:nowrap;
+}
+
+.total-row{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-end;
+
+    margin-top:26px;
+
+    padding-top:24px;
+
+    border-top:1px solid var(--line);
+}
+
+.total-label{
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+.total-price{
+    font-family:var(--serif);
+
+    font-size:44px;
+
+    color:var(--sage);
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.place-btn{
+    width:100%;
+
+    margin-top:34px;
+
+    border:none;
+
+    border-radius:999px;
+
+    padding:18px 30px;
+
+    background:var(--ink);
+
+    color:var(--cream);
+
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    cursor:pointer;
+
+    transition:
+        transform .3s ease,
+        background .3s ease,
+        box-shadow .3s ease;
+}
+
+.place-btn:hover{
+
+    background:var(--sage);
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.14);
+}
+
+/* =========================================================
+   BACK LINK
+========================================================= */
+
+.back-link{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-bottom:20px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    transition:.25s ease;
+}
+
+.back-link:hover{
+    color:var(--ink);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .checkout-page{
+        padding:
+            calc(var(--nav-h) + 20px)
+            16px
+            80px;
+    }
+    #checkout-page{
+        padding: 2vh;
+    }
+
+    .glass-card{
+        padding:24px;
+        border-radius:26px;
+    }
+
+    .checkout-title{
+        font-size:58px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .summary-title{
+        font-size:30px;
+    }
+
+    .total-price{
+        font-size:36px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="checkout-page" id="checkout-page">
+
+    <!-- HERO -->
+
+    <div class="checkout-hero">
+
+        <a href="/cart" class="back-link">
+            ← Back to Cart
+        </a>
+
+        <div class="hero-label">
+            Secure Checkout
+        </div>
+
+        <div class="checkout-title">
+            Carefully packed, <em>ready to arrive.</em>
+        </div>
+
+        <div class="checkout-sub">
+            Finalize your handmade Thread & Things order,
+            delivery details, notes, and payment securely.
+        </div>
+
+    </div>
+
+    <form action="/order/place" method="post">
+
+        <div class="checkout-layout">
+
+            <!-- LEFT -->
+
+            <div class="glass-card">
+
+                {% if addresses %}
+
+                <div class="saved-title">
+                    Saved Addresses
+                </div>
+
+                <div class="address-list">
+
+                    {% for addr in addresses %}
+
+                    <label class="saved-addr">
+
+                        <input
+                            type="radio"
+                            name="address_id"
+                            value="{{ addr.id }}"
+                            {% if addr.is_default %}checked{% endif %}
+                        >
+
+                        <div class="addr-content">
+
+                            <div class="addr-name">
+                                {{ addr.full_name }}
+                            </div>
+
+                            <div class="addr-text">
+                                {{ addr.address_line }},
+                                {{ addr.city }},
+                                {{ addr.state }}
+                                {{ addr.pincode }}
+                                <br>
+                                {{ addr.phone }}
+                            </div>
+
+                        </div>
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+                <!-- ADDRESS -->
+
+                <div class="section-title">
+                    Delivery Details
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="full_name"
+                            class="input"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Phone
+                        </label>
+
+                        <input
+                            type="tel"
+                            name="phone"
+                            class="input"
+                        >
+
+                    </div>
+
+                    <div class="form-group full">
+
+                        <label class="form-label">
+                            Address
+                        </label>
+
+                        <textarea
+                            name="address_line"
+                        ></textarea>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            City
+                        </label>
+
+                        <input
+                            type="text"
+                            name="city"
+                            class="input"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            name="state"
+                            class="input"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Pincode
+                        </label>
+
+                        <input
+                            type="text"
+                            name="pincode"
+                            maxlength="6"
+                            class="input"
+                        >
+
+                    </div>
+
+                </div>
+
+                <label class="save-check">
+
+                    <input
+                        type="checkbox"
+                        name="save_address"
+                    >
+
+                    Save this address for future orders
+
+                </label>
+
+                <!-- MESSAGE -->
+                <hr style="margin: 30px 0 ;">
+                <div
+                    class="section-title"
+                    style="margin-top:50px;"
+                >
+                    Special Instructions
+                </div>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Order Message / Gift Note
+                    </label>
+
+                    <textarea
+                        name="custom_message"
+                        maxlength="500"
+                        placeholder="Happy Birthday, custom packaging request, delivery notes..."
+                    ></textarea>
+
+                </div>
+
+                <!-- ITEM NOTES -->
+
+                <div class="item-notes">
+
+                    {% for item in cart_items %}
+
+                    <div class="note-box">
+
+                        <div class="note-product">
+                            {{ item.product.name }}
+                        </div>
+
+                        <textarea
+                            name="item_notes_{{ item.product_id }}"
+                            maxlength="300"
+                            placeholder="Customization, color preference, special request..."
+                        ></textarea>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- PAYMENT -->
+
+                <div
+                    class="section-title"
+                    style="margin-top:50px;"
+                >
+                    Payment Method
+                </div>
+
+                <div class="payment-options">
+
+                    <label class="payment-option">
+
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="COD"
+                            checked
+                        >
+
+                        <div>
+
+                            <div class="payment-title">
+                                Cash on Delivery
+                            </div>
+
+                            <div class="payment-sub">
+                                Pay when your handmade order arrives.
+                            </div>
+
+                        </div>
+
+                    </label>
+
+                    <label class="payment-option">
+
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="ONLINE"
+                        >
+
+                        <div>
+
+                            <div class="payment-title">
+                                Online Payment
+                            </div>
+
+                            <div class="payment-sub">
+                                Secure online payment experience.
+                            </div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+
+            <aside class="glass-card summary-card">
+
+                <div class="summary-title">
+                    Order Summary
+                </div>
+
+                <div class="summary-items">
+
+                    {% for item in cart_items %}
+
+                    <div class="summary-item">
+
+                        <div class="item-name">
+                            {{ item.product.name }}
+                            × {{ item.quantity }}
+                        </div>
+
+                        <div class="item-price">
+                            ₹{{ item.subtotal }}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <div class="total-row">
+
+                    <div class="total-label">
+                        Total
+                    </div>
+
+                    <div class="total-price">
+                        ₹{{ total }}
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="place-btn"
+                >
+                    Place Order — ₹{{ total }}
+                </button>
+
+            </aside>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

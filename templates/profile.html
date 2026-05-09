@@ -1,0 +1,993 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — Thread &amp; Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PROFILE PAGE
+========================================================= */
+
+.profile-page{
+  position:relative;
+  overflow:hidden;
+
+  padding:
+    calc(var(--nav-h) + 60px)
+    clamp(20px,5vw,80px)
+    120px;
+
+  min-height:100vh;
+}
+
+/* =========================================================
+   BACKGROUND BLUR
+========================================================= */
+
+.bg-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(100px);
+  opacity:.18;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.orb-a{
+  width:320px;
+  height:320px;
+  background:#d8c3ab;
+  top:120px;
+  right:-80px;
+}
+
+.orb-b{
+  width:240px;
+  height:240px;
+  background:#adb59b;
+  bottom:120px;
+  left:-60px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.profile-hero{
+  margin-bottom:70px;
+    margin-top: 14vh;
+}
+
+.profile-label{
+  display:flex;
+  align-items:center;
+  gap:14px;
+
+  margin-bottom:26px;
+
+  font-size:11px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+.profile-label::before{
+  content:"";
+  width:42px;
+  height:1px;
+  background:var(--muted);
+}
+
+.profile-hero h1{
+  font-family:var(--serif);
+  font-weight:300;
+
+  font-size:clamp(54px,9vw,128px);
+  line-height:.92;
+  letter-spacing:-.05em;
+
+  margin:0 0 24px;
+}
+
+.profile-hero h1 em{
+  color:var(--sage);
+  font-style:italic;
+}
+
+.profile-sub{
+  max-width:620px;
+  margin-left: 1%;
+  font-size:16px;
+  line-height:1.8;
+
+  color:var(--ink-soft);
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.profile-layout{
+  display:grid;
+  grid-template-columns:420px 1fr;
+  gap:36px;
+padding: 5%;
+  align-items:start;
+}
+
+@media(max-width:1020px){
+  .profile-layout{
+    grid-template-columns:1fr;
+  }
+}
+
+/* =========================================================
+   GLASS CARD
+========================================================= */
+
+.glass-card{
+  position:relative;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.72),
+      rgba(255,255,255,.52)
+    );
+
+  border:1px solid rgba(255,255,255,.48);
+
+  border-radius:30px;
+
+  overflow:hidden;
+
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.04);
+
+  transition:
+    transform .55s cubic-bezier(.2,.8,.2,1),
+    border-color .3s ease;
+
+  opacity:0;
+  transform:translateY(40px);
+}
+
+.glass-card.in{
+  opacity:1;
+  transform:none;
+}
+
+.glass-card:hover{
+  border-color:#cab9a6;
+}
+
+/* =========================================================
+   PROFILE SIDEBAR
+========================================================= */
+
+.profile-sidebar{
+  padding:34px;
+}
+
+/* AVATAR */
+
+.avatar-wrap{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.avatar{
+  width:110px;
+  height:110px;
+
+  margin:0 auto 20px;
+
+  border-radius:50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent-h)
+    );
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-family:var(--serif);
+  font-size:40px;
+
+  color:white;
+
+  box-shadow:
+    0 20px 50px rgba(181,101,29,.22);
+}
+
+.avatar-name{
+  font-family:var(--serif);
+  font-size:34px;
+  line-height:1;
+  letter-spacing:-.03em;
+
+  margin-bottom:8px;
+}
+
+.avatar-joined{
+  font-size:13px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+/* =========================================================
+   INFO ROWS
+========================================================= */
+
+.info-group{
+  margin-bottom:34px;
+}
+
+.info-row{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+
+  padding:16px 0;
+
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.info-row:last-child{
+  border-bottom:none;
+}
+
+.info-label{
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+.info-value{
+  text-align:right;
+
+  font-size:15px;
+  color:var(--ink);
+}
+
+.status{
+  color:var(--success);
+  font-weight:500;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.profile-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+
+  padding:16px 20px;
+
+  border-radius:999px;
+
+  background:var(--ink);
+  color:var(--cream);
+
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+
+  transition:all .3s ease;
+}
+
+.profile-btn:hover{
+  background:var(--sage);
+  transform:translateY(-2px);
+}
+
+/* =========================================================
+   RIGHT SECTION
+========================================================= */
+
+.profile-main{
+  display:flex;
+  flex-direction:column;
+  gap:34px;
+}
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  margin-bottom:28px;
+}
+
+.card-title{
+  font-family:var(--serif);
+  font-size:34px;
+  font-weight:400;
+  letter-spacing:-.03em;
+}
+
+.card-link{
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+
+  color:var(--accent);
+
+  border-bottom:1px solid transparent;
+
+  transition:border-color .25s ease;
+}
+
+.card-link:hover{
+  border-color:var(--ink);
+}
+
+/* =========================================================
+   QUICK LINKS
+========================================================= */
+
+.quick-card{
+  padding:34px;
+}
+
+.quick-links{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+@media(max-width:700px){
+  .quick-links{
+    grid-template-columns:1fr;
+  }
+}
+
+.quick-link{
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  gap:16px;
+
+  padding:22px;
+
+  border-radius:22px;
+
+  background:rgba(255,255,255,.55);
+
+  border:1px solid rgba(0,0,0,.05);
+
+  transition:
+    transform .3s ease,
+    border-color .3s ease,
+    background .3s ease;
+}
+
+.quick-link:hover{
+  transform:translateY(-4px);
+
+  border-color:#cab9a6;
+
+  background:rgba(255,255,255,.82);
+}
+
+.quick-icon{
+  width:54px;
+  height:54px;
+
+  border-radius:18px;
+
+  background:var(--cream-2);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:22px;
+}
+
+.quick-text{
+  flex:1;
+}
+
+.quick-title{
+  font-size:16px;
+  font-weight:500;
+
+  margin-bottom:4px;
+}
+
+.quick-sub{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.quick-arrow{
+  color:var(--muted);
+  font-size:22px;
+}
+
+/* =========================================================
+   ADDRESS CARD
+========================================================= */
+
+.address-card{
+  padding:34px;
+}
+
+.address-grid{
+  display:grid;
+  gap:18px;
+}
+
+.address-item{
+  position:relative;
+
+  padding:24px;
+
+  border-radius:24px;
+
+  background:rgba(255,255,255,.5);
+
+  border:1px solid rgba(0,0,0,.06);
+
+  transition:
+    transform .3s ease,
+    border-color .3s ease;
+}
+
+.address-item:hover{
+  transform:translateY(-3px);
+  border-color:#cab9a6;
+}
+
+.address-item.default{
+  border-color:#b5651d;
+  background:#fffaf5;
+}
+
+.default-badge{
+  position:absolute;
+  top:18px;
+  right:18px;
+
+  padding:6px 12px;
+
+  border-radius:999px;
+
+  background:var(--accent);
+  color:white;
+
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.addr-name{
+  font-size:18px;
+  font-weight:500;
+
+  margin-bottom:10px;
+}
+
+.addr-text{
+  color:var(--ink-soft);
+
+  font-size:14px;
+  line-height:1.8;
+
+  margin-bottom:20px;
+}
+
+.addr-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.addr-btn{
+  padding:10px 16px;
+
+  border-radius:999px;
+
+  border:1px solid var(--line);
+
+  background:transparent;
+
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+
+  color:var(--ink-soft);
+
+  cursor:pointer;
+
+  transition:all .25s ease;
+}
+
+.addr-btn:hover{
+  border-color:var(--ink);
+  color:var(--ink);
+}
+
+.addr-btn.danger:hover{
+  border-color:var(--danger);
+  color:var(--danger);
+}
+
+/* =========================================================
+   EMPTY ADDRESS
+========================================================= */
+
+.empty-address{
+  text-align:center;
+  padding:60px 20px;
+}
+
+.empty-icon{
+  font-size:46px;
+  margin-bottom:18px;
+}
+
+.empty-title{
+  font-family:var(--serif);
+  font-size:34px;
+
+  margin-bottom:12px;
+}
+
+.empty-sub{
+  color:var(--muted);
+  margin-bottom:28px;
+}
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+.flash-wrap{
+  margin-bottom:24px;
+}
+
+.flash{
+  padding:16px 20px;
+
+  border-radius:18px;
+
+  font-size:14px;
+
+  backdrop-filter:blur(10px);
+}
+
+.flash.success{
+  background:#eaf5ec;
+  color:var(--success);
+}
+
+.flash.error{
+  background:#fdecea;
+  color:var(--danger);
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal{
+  opacity:0;
+  transform:translateY(30px);
+
+  transition:
+    opacity .9s cubic-bezier(.2,.8,.2,1),
+    transform .9s cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal.in{
+  opacity:1;
+  transform:none;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+  .profile-page{
+    padding:
+      calc(var(--nav-h) + 40px)
+      20px
+      100px;
+  }
+  .profile-hero{
+    margin-top: 0vh;
+  }
+  .profile-sidebar,
+  .quick-card,
+  .address-card{
+    padding:26px;
+  }
+  .glass-card.in{
+  width: 100vw;
+    }
+
+  .profile-hero h1{
+    font-size:clamp(48px,11vw,82px);
+  }
+
+  .card-title{
+    font-size:28px;
+  }
+
+  .avatar-name{
+    font-size:28px;
+  }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-page">
+
+  <!-- BACKGROUND -->
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <!-- FLASH -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- HERO -->
+  <div class="profile-hero reveal">
+
+    <div class="profile-label">
+      Your Account
+    </div>
+
+    <h1>
+      Made personal, <br>
+      <em>for everyday living.</em>
+    </h1>
+
+    <p class="profile-sub">
+      Manage your profile, saved addresses, orders,
+      and personal details — all in one thoughtfully
+      designed space.
+    </p>
+
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="profile-layout">
+
+    <!-- LEFT -->
+    <aside class="glass-card profile-sidebar reveal">
+
+      <!-- AVATAR -->
+      <div class="avatar-wrap">
+
+        <div class="avatar">
+          {{ user.name[0]|upper }}
+        </div>
+
+        <div class="avatar-name">
+          {{ user.name }}
+        </div>
+
+        <div class="avatar-joined">
+          Member since {{ user.created_at.strftime('%B %Y') }}
+        </div>
+
+      </div>
+
+      <!-- INFO -->
+      <div class="info-group">
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ user.email }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Phone</span>
+          <span class="info-value">
+            {{ user.phone if user.phone else '—' }}
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Account</span>
+          <span class="info-value status">
+            ● Active
+          </span>
+        </div>
+
+      </div>
+
+      <a href="/profile/edit" class="profile-btn">
+        Edit Profile
+      </a>
+
+    </aside>
+
+    <!-- RIGHT -->
+    <div class="profile-main">
+
+      <!-- QUICK LINKS -->
+      <div class="glass-card quick-card reveal">
+
+        <div class="card-head">
+
+          <div class="card-title">
+            Account
+          </div>
+
+        </div>
+
+        <div class="quick-links">
+
+          <a href="/order/history" class="quick-link">
+
+            <div class="quick-icon">📦</div>
+
+            <div class="quick-text">
+              <div class="quick-title">
+                My Orders
+              </div>
+
+              <div class="quick-sub">
+                Track & manage orders
+              </div>
+            </div>
+
+            <div class="quick-arrow">›</div>
+
+          </a>
+
+          <a href="/wishlist" class="quick-link">
+
+            <div class="quick-icon">♡</div>
+
+            <div class="quick-text">
+              <div class="quick-title">
+                Wishlist
+              </div>
+
+              <div class="quick-sub">
+                Saved products
+              </div>
+            </div>
+
+            <div class="quick-arrow">›</div>
+
+          </a>
+
+          <a href="/profile/change-password" class="quick-link">
+
+            <div class="quick-icon">🔒</div>
+
+            <div class="quick-text">
+              <div class="quick-title">
+                Change Password
+              </div>
+
+              <div class="quick-sub">
+                Update your password
+              </div>
+            </div>
+
+            <div class="quick-arrow">›</div>
+
+          </a>
+
+          <a href="/auth/logout" class="quick-link">
+
+            <div class="quick-icon">↩</div>
+
+            <div class="quick-text">
+              <div class="quick-title">
+                Logout
+              </div>
+
+              <div class="quick-sub">
+                Sign out of your account
+              </div>
+            </div>
+
+            <div class="quick-arrow">›</div>
+
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- ADDRESSES -->
+      <div class="glass-card address-card reveal">
+
+        <div class="card-head">
+
+          <div class="card-title">
+            Saved Addresses
+          </div>
+
+          <a
+            href="/profile/address/add"
+            class="card-link"
+          >
+            Add New
+          </a>
+
+        </div>
+
+        {% if addresses %}
+
+        <div class="address-grid">
+
+          {% for addr in addresses %}
+
+          <div class="address-item {% if addr.is_default %}default{% endif %}">
+
+            {% if addr.is_default %}
+              <div class="default-badge">
+                Default
+              </div>
+            {% endif %}
+
+            <div class="addr-name">
+              {{ addr.full_name }}
+            </div>
+
+            <div class="addr-text">
+              {{ addr.address_line }}<br>
+              {{ addr.city }}, {{ addr.state }} — {{ addr.pincode }}<br>
+              {{ addr.phone }}
+            </div>
+
+            <div class="addr-actions">
+
+              {% if not addr.is_default %}
+
+              <form
+                action="/profile/address/set-default/{{ addr.id }}"
+                method="post"
+              >
+                <button
+                  type="submit"
+                  class="addr-btn"
+                >
+                  Set Default
+                </button>
+              </form>
+
+              {% endif %}
+
+              <a
+                href="/profile/address/edit/{{ addr.id }}"
+                class="addr-btn"
+              >
+                Edit
+              </a>
+
+              <form
+                action="/profile/address/delete/{{ addr.id }}"
+                method="post"
+                onsubmit="return confirm('Remove this address?')"
+              >
+                <button
+                  type="submit"
+                  class="addr-btn danger"
+                >
+                  Remove
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+
+          {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-address">
+
+          <div class="empty-icon">
+            📍
+          </div>
+
+          <div class="empty-title">
+            No addresses yet
+          </div>
+
+          <div class="empty-sub">
+            Save addresses for faster checkout and easier ordering.
+          </div>
+
+          <a
+            href="/profile/address/add"
+            class="profile-btn"
+            style="max-width:260px;margin:auto;"
+          >
+            Add Address
+          </a>
+
+        </div>
+
+        {% endif %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<script>
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const observer = new IntersectionObserver((entries)=>{
+
+  entries.forEach(entry=>{
+
+    if(entry.isIntersecting){
+      entry.target.classList.add('in');
+    }
+
+  });
+
+},{
+  threshold:.12
+});
+
+document.querySelectorAll('.reveal')
+.forEach((el,i)=>{
+
+  el.style.transitionDelay = `${i * 0.08}s`;
+
+  observer.observe(el);
+
+});
+
+</script>
+
+{% endblock %}

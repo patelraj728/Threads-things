@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} — Thread & Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.order-page{
+
+    padding:
+        calc(var(--nav-h) + 40px)
+        clamp(18px,4vw,70px)
+        100px;
+
+    max-width:1200px;
+    margin:auto;
+}
+#order-page{
+    padding: 20vh;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.order-top{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    gap:20px;
+
+    margin-bottom:40px;
+
+    flex-wrap:wrap;
+}
+
+.order-top h1{
+
+    font-family:var(--serif);
+    font-weight:300;
+
+    font-size:clamp(42px,7vw,76px);
+
+    line-height:.95;
+    letter-spacing:-.04em;
+
+    margin:0 0 12px;
+}
+
+.order-top p{
+
+    color:var(--muted);
+    margin:0;
+}
+
+.back-link{
+
+    font-size:12px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+
+    color:var(--ink-soft);
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.order-grid{
+
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+
+    gap:30px;
+}
+
+@media(max-width:980px){
+
+    .order-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card{
+
+    background:rgba(255,255,255,.72);
+
+    border:1px solid var(--line);
+
+    border-radius:28px;
+
+    padding:28px;
+
+    backdrop-filter:blur(14px);
+}
+
+.card-title{
+
+    font-family:var(--serif);
+
+    font-size:38px;
+    font-weight:300;
+
+    margin:0 0 28px;
+}
+
+/* =========================================================
+   ORDER STATUS TIMELINE
+========================================================= */
+
+.timeline{
+
+    position:relative;
+
+    margin-top:20px;
+}
+
+/* LINE */
+
+.timeline::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:24px;
+    left:0;
+    right:0;
+
+    height:4px;
+
+    background:
+        rgba(0,0,0,.08);
+
+    border-radius:999px;
+}
+
+/* FILLED LINE */
+
+.timeline-progress{
+
+    position:absolute;
+
+    top:24px;
+    left:0;
+
+    height:4px;
+
+    border-radius:999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--sage),
+            var(--ink)
+        );
+
+    animation:growLine 1.8s ease forwards;
+}
+
+/* WIDTHS */
+
+.timeline.progress-0 .timeline-progress{
+    width:0%;
+}
+
+.timeline.progress-1 .timeline-progress{
+    width:20%;
+}
+
+.timeline.progress-2 .timeline-progress{
+    width:40%;
+}
+
+.timeline.progress-3 .timeline-progress{
+    width:60%;
+}
+
+.timeline.progress-4 .timeline-progress{
+    width:80%;
+}
+
+.timeline.progress-5 .timeline-progress{
+    width:100%;
+}
+
+/* STEPS */
+
+.timeline-steps{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    position:relative;
+
+    z-index:2;
+
+    gap:10px;
+}
+
+.step{
+
+    flex:1;
+
+    text-align:center;
+
+    min-width:90px;
+}
+
+/* CIRCLE */
+
+.step-circle{
+
+    width:48px;
+    height:48px;
+
+    margin:0 auto 14px;
+
+    border-radius:50%;
+
+    background:white;
+
+    border:2px solid var(--line);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:16px;
+
+    transition:.35s ease;
+}
+
+/* DONE */
+
+.step.done .step-circle{
+
+    background:var(--sage);
+
+    border-color:var(--sage);
+
+    color:white;
+}
+
+/* ACTIVE */
+
+.step.active .step-circle{
+
+    background:var(--ink);
+
+    border-color:var(--ink);
+
+    color:white;
+
+    animation:pulse 2s infinite;
+}
+
+/* LABEL */
+
+.step-label{
+
+    font-size:11px;
+
+    line-height:1.5;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+#order-page{
+    padding: 2vh;
+}
+    .timeline{
+        padding-left:10px;
+    }
+
+    .timeline::before,
+    .timeline-progress{
+
+        left:22px;
+
+        top:0;
+
+        width:4px !important;
+
+        height:100%;
+    }
+
+    .timeline-steps{
+
+        flex-direction:column;
+
+        gap:26px;
+    }
+
+    .step{
+
+        display:flex;
+
+        align-items:center;
+
+        text-align:left;
+
+        gap:18px;
+    }
+
+    .step-circle{
+
+        margin:0;
+
+        flex-shrink:0;
+    }
+
+    .step-label{
+
+        font-size:12px;
+    }
+
+    .timeline.progress-0 .timeline-progress{
+        height:0%;
+    }
+
+    .timeline.progress-1 .timeline-progress{
+        height:20%;
+    }
+
+    .timeline.progress-2 .timeline-progress{
+        height:40%;
+    }
+
+    .timeline.progress-3 .timeline-progress{
+        height:60%;
+    }
+
+    .timeline.progress-4 .timeline-progress{
+        height:80%;
+    }
+
+    .timeline.progress-5 .timeline-progress{
+        height:100%;
+    }
+
+}
+
+/* =========================================================
+   ORDER ITEMS
+========================================================= */
+
+.items{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:18px;
+}
+
+.item{
+
+    display:flex;
+    gap:18px;
+
+    padding:18px;
+
+    border:1px solid var(--line);
+
+    border-radius:20px;
+
+    background:rgba(255,255,255,.55);
+}
+
+.item img{
+
+    width:120px;
+    height:120px;
+
+    object-fit:cover;
+
+    border-radius:16px;
+}
+
+.item-info{
+
+    flex:1;
+}
+
+.item-info h3{
+
+    font-family:var(--serif);
+    font-size:28px;
+    font-weight:300;
+
+    margin:0 0 8px;
+}
+
+.item-meta{
+
+    color:var(--muted);
+
+    font-size:14px;
+
+    margin-bottom:8px;
+}
+
+.item-price{
+
+    font-family:var(--serif);
+    font-size:24px;
+
+    color:var(--sage);
+}
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.summary-row{
+
+    display:flex;
+    justify-content:space-between;
+
+    margin-bottom:16px;
+
+    font-size:15px;
+}
+
+.summary-total{
+
+    padding-top:18px;
+
+    border-top:1px solid var(--line);
+
+    font-size:22px;
+
+    font-family:var(--serif);
+}
+
+/* =========================================================
+   ADDRESS
+========================================================= */
+
+.address{
+
+    color:var(--ink-soft);
+
+    line-height:1.8;
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes growLine{
+
+    from{
+        opacity:.4;
+    }
+
+    to{
+        opacity:1;
+    }
+}
+
+@keyframes pulse{
+
+    0%{
+        box-shadow:0 0 0 0 rgba(28,28,26,.4);
+    }
+
+    70%{
+        box-shadow:0 0 0 18px rgba(28,28,26,0);
+    }
+
+    100%{
+        box-shadow:0 0 0 0 rgba(28,28,26,0);
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% set stages = [
+    'PLACED',
+    'CONFIRMED',
+    'PACKED',
+    'SHIPPED',
+    'OUT_FOR_DELIVERY',
+    'DELIVERED'
+] %}
+
+{% set labels = [
+    'Placed',
+    'Confirmed',
+    'Packed',
+    'Shipped',
+    'Out For Delivery',
+    'Delivered'
+] %}
+
+{% set current_idx = stages.index(order.status) if order.status in stages else 0 %}
+
+<section class="order-page" id="order-page">
+
+    <!-- TOP -->
+
+    <div class="order-top">
+
+        <div>
+
+            <a href="/order/history" class="back-link">
+                ← Back to Orders
+            </a>
+
+            <h1>
+                Order #{{ order.id }}
+            </h1>
+
+            <p>
+                Placed on
+                {{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- GRID -->
+
+    <div class="order-grid">
+
+        <!-- LEFT -->
+
+        <div>
+
+            <!-- TRACKING -->
+
+            <div class="card">
+
+                <h2 class="card-title">
+                    Order Progress
+                </h2>
+
+                <div class="timeline progress-{{ current_idx }}">
+
+                    <div class="timeline-progress"></div>
+
+                    <div class="timeline-steps">
+
+                        {% for stage in stages %}
+
+                        {% set idx = loop.index0 %}
+
+                        <div class="step
+                            {% if idx < current_idx %}done{% endif %}
+                            {% if idx == current_idx %}active{% endif %}
+                        ">
+
+                            <div class="step-circle">
+
+                                {% if idx < current_idx %}
+                                    ✓
+                                {% elif idx == current_idx %}
+                                    ●
+                                {% else %}
+                                    ○
+                                {% endif %}
+
+                            </div>
+
+                            <div class="step-label">
+                                {{ labels[idx] }}
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ITEMS -->
+
+            <div class="card" style="margin-top:30px;">
+
+                <h2 class="card-title">
+                    Items Ordered
+                </h2>
+
+                <div class="items">
+
+                    {% for item in order.items %}
+
+                    <div class="item">
+
+                        {% if item.product.images %}
+
+                        <img
+                            src="{{ url_for('static', filename=item.product.images[0].image_url) }}"
+                            alt="{{ item.product.name }}"
+                        >
+
+                        {% endif %}
+
+                        <div class="item-info">
+
+                            <h3>
+                                {{ item.product.name }}
+                            </h3>
+
+                            <div class="item-meta">
+
+                                Qty: {{ item.quantity }}
+                                ·
+                                ₹{{ item.price }} each
+
+                            </div>
+
+                            <div class="item-price">
+                                ₹{{ item.quantity * item.price }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+
+        <div>
+
+            <!-- SUMMARY -->
+
+            <div class="card">
+
+                <h2 class="card-title">
+                    Summary
+                </h2>
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ order.total_amount }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Status</span>
+                    <span>{{ order.status }}</span>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span>₹{{ order.total_amount }}</span>
+                </div>
+
+            </div>
+
+            <!-- ADDRESS -->
+
+            {% if order.shipping_address %}
+
+            <div class="card" style="margin-top:30px;">
+
+                <h2 class="card-title">
+                    Shipping Address
+                </h2>
+
+                <div class="address">
+                    {{ order.shipping_address }}
+                </div>
+
+            </div>
+
+            {% endif %}
+
+            <!-- MESSAGE -->
+
+            {% if order.custom_message %}
+
+            <div class="card" style="margin-top:30px;">
+
+                <h2 class="card-title">
+                    Custom Message
+                </h2>
+
+                <div class="address">
+                    {{ order.custom_message }}
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

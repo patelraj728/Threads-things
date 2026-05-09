@@ -1,0 +1,832 @@
+{% extends "admin/base_admin.html" %}
+{% set active_page = 'products' %}
+
+{% block title %}Products{% endblock %}
+{% block heading %}Manage Products{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.products-page{
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.products-hero{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.82),
+            rgba(255,255,255,.64)
+        );
+
+    border:1px solid var(--line);
+
+    border-radius:34px;
+
+    padding:40px;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.05);
+}
+
+.products-hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    border-radius:999px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(107,115,85,.16),
+            transparent 70%
+        );
+
+    top:-90px;
+    right:-80px;
+}
+
+.hero-label{
+    font-size:11px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:16px;
+}
+
+.hero-title{
+    font-family:var(--serif);
+
+    font-size:clamp(42px,5vw,74px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    margin-bottom:18px;
+
+    color:var(--ink);
+}
+
+.hero-title em{
+    font-style:italic;
+    color:var(--sage);
+}
+
+.hero-text{
+    max-width:720px;
+
+    color:var(--ink-soft);
+
+    font-size:15px;
+
+    line-height:1.8;
+}
+
+/* =========================================================
+   TOP ACTIONS
+========================================================= */
+
+.page-actions{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:16px;
+}
+
+.product-count{
+    font-size:12px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+.btn-add{
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    padding:14px 22px;
+
+    border-radius:18px;
+
+    background:var(--ink);
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:12px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    transition:all .25s ease;
+}
+
+.btn-add:hover{
+    background:var(--sage);
+
+    transform:translateY(-2px);
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.product-grid{
+    list-style:none;
+
+    padding:0;
+    margin:0;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fill,minmax(290px,1fr));
+
+    gap:28px;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.product-card{
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    background:
+        rgba(255,255,255,.78);
+
+    border:1px solid var(--line);
+
+    border-radius:30px;
+
+    backdrop-filter:blur(14px);
+
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+
+    animation:fadeUp .6s ease;
+}
+
+.product-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+        0 22px 44px rgba(0,0,0,.08);
+}
+
+.product-card::before{
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(255,255,255,.9),
+            transparent 40%
+        );
+
+    pointer-events:none;
+}
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.product-media{
+    position:relative;
+
+    width:100%;
+    height:260px;
+
+    overflow:hidden;
+
+    background:var(--cream-2);
+}
+
+.product-image{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    transition:transform 1s ease;
+}
+
+.product-card:hover .product-image{
+    transform:scale(1.08);
+}
+
+.no-image{
+    width:100%;
+    height:100%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+/* =========================================================
+   CATEGORY
+========================================================= */
+
+.category-badge{
+    position:absolute;
+
+    top:16px;
+    left:16px;
+
+    padding:8px 12px;
+
+    border-radius:999px;
+
+    background:
+        rgba(255,255,255,.92);
+
+    backdrop-filter:blur(10px);
+
+    font-size:10px;
+
+    letter-spacing:.16em;
+
+    text-transform:uppercase;
+
+    color:var(--ink);
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+.product-body{
+    padding:24px;
+
+    display:flex;
+    flex-direction:column;
+
+    flex:1;
+}
+
+.product-name{
+    font-family:var(--serif);
+
+    font-size:28px;
+
+    line-height:1.1;
+
+    letter-spacing:-.02em;
+
+    margin-bottom:12px;
+
+    color:var(--ink);
+}
+
+.product-desc{
+    color:var(--ink-soft);
+
+    font-size:14px;
+
+    line-height:1.8;
+
+    margin-bottom:22px;
+
+    display:-webkit-box;
+
+    -webkit-line-clamp:3;
+
+    -webkit-box-orient:vertical;
+
+    overflow:hidden;
+}
+
+/* =========================================================
+   META
+========================================================= */
+
+.product-meta{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-end;
+
+    gap:14px;
+
+    margin-top:auto;
+
+    padding-top:18px;
+
+    border-top:1px solid rgba(0,0,0,.06);
+}
+
+.product-price{
+    font-family:var(--serif);
+
+    font-size:28px;
+
+    color:var(--sage);
+}
+
+.stock-wrap{
+    text-align:right;
+}
+
+.stock-label{
+    font-size:11px;
+
+    letter-spacing:.12em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:6px;
+}
+
+.stock-value{
+    font-size:15px;
+
+    font-weight:700;
+
+    color:var(--ink);
+}
+
+.stock-value.low{
+    color:#c0392b;
+}
+
+/* =========================================================
+   STOCK BAR
+========================================================= */
+
+.stock-bar{
+    width:100%;
+
+    height:7px;
+
+    border-radius:999px;
+
+    background:#ece8e1;
+
+    overflow:hidden;
+
+    margin-top:12px;
+}
+
+.stock-fill{
+    height:100%;
+
+    border-radius:999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--sage),
+            var(--ink)
+        );
+
+    animation:growBar 1s ease;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.product-actions{
+    display:flex;
+
+    gap:12px;
+
+    margin-top:24px;
+}
+
+.action-btn{
+    flex:1;
+
+    text-align:center;
+
+    padding:12px 14px;
+
+    border-radius:16px;
+
+    text-decoration:none;
+
+    font-size:11px;
+
+    letter-spacing:.14em;
+
+    text-transform:uppercase;
+
+    transition:all .25s ease;
+}
+
+.btn-edit{
+    background:var(--ink);
+
+    color:white;
+}
+
+.btn-edit:hover{
+    background:var(--sage);
+}
+
+.btn-delete{
+    border:1px solid #f3c7c7;
+
+    color:#b42318;
+
+    background:#fff5f5;
+}
+
+.btn-delete:hover{
+    background:#b42318;
+
+    color:white;
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-state{
+    text-align:center;
+
+    padding:110px 20px;
+
+    background:
+        rgba(255,255,255,.76);
+
+    border:1px solid var(--line);
+
+    border-radius:34px;
+
+    backdrop-filter:blur(14px);
+}
+
+.empty-state h2{
+    font-family:var(--serif);
+
+    font-size:64px;
+
+    font-weight:400;
+
+    margin-bottom:18px;
+}
+
+.empty-state p{
+    color:var(--muted);
+
+    margin-bottom:28px;
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(24px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+@keyframes growBar{
+
+    from{
+        width:0;
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .products-hero{
+        padding:28px;
+    }
+
+    .hero-title{
+        font-size:44px;
+    }
+
+    .product-grid{
+        grid-template-columns:1fr;
+    }
+
+    .product-name{
+        font-size:24px;
+    }
+
+    .product-price{
+        font-size:24px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="products-page">
+
+    <!-- HERO -->
+
+    <section class="products-hero">
+
+        <div class="hero-label">
+            Product Management
+        </div>
+
+        <div class="hero-title">
+            Crafted pieces, <em>beautifully managed.</em>
+        </div>
+
+        <div class="hero-text">
+            Manage your handmade collection, update inventory,
+            edit pricing, and keep your Thread & Things catalog
+            elegant and organized.
+        </div>
+
+    </section>
+
+    <!-- ACTIONS -->
+
+    <div class="page-actions">
+
+        <div class="product-count">
+
+            {% if products %}
+                {{ products|length }} Product{{ '' if products|length == 1 else 's' }}
+            {% else %}
+                No Products
+            {% endif %}
+
+        </div>
+
+        <a href="/admin/product/add" class="btn-add">
+            ✨ Add Product
+        </a>
+
+    </div>
+
+    <!-- PRODUCTS -->
+
+    {% if products %}
+
+    <ul class="product-grid">
+
+        {% for product in products %}
+
+        <li class="product-card">
+
+            <!-- IMAGE -->
+
+            <div class="product-media">
+
+                {% if product.images %}
+
+                <img
+                    class="product-image"
+                    src="{{ url_for('static', filename=product.images[0].image_url) }}"
+                    alt="{{ product.name }}"
+                >
+
+                {% else %}
+
+                <div class="no-image">
+                    No Image Available
+                </div>
+
+                {% endif %}
+
+                <div class="category-badge">
+                    {{ product.category.name }}
+                </div>
+                <div class="category-badge" style="top:52px;">
+
+    {% if product.is_active %}
+
+        Active
+
+    {% else %}
+
+        Inactive
+
+    {% endif %}
+
+</div>
+
+            </div>
+
+            <!-- BODY -->
+
+            <div class="product-body">
+
+                <div class="product-name">
+                    {{ product.name }}
+                </div>
+
+                <div class="product-desc">
+
+                    {% if product.description %}
+
+                        {{ product.description }}
+
+                    {% else %}
+
+                        Handmade product crafted carefully
+                        with timeless details and premium quality.
+
+                    {% endif %}
+
+                </div>
+
+                <!-- META -->
+
+                <div class="product-meta">
+
+                    <div>
+
+                        <div class="stock-label">
+                            Price
+                        </div>
+
+                        <div class="product-price">
+                            ₹{{ product.price }}
+                        </div>
+
+                    </div>
+
+                    <div class="stock-wrap">
+
+                        <div class="stock-label">
+                            Stock
+                        </div>
+
+                        <div class="stock-value
+                            {% if product.stock_quantity < 5 %}
+                            low
+                            {% endif %}
+                        ">
+                            {{ product.stock_quantity }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- STOCK BAR -->
+
+                <div class="stock-bar">
+
+                    <div
+                        class="stock-fill"
+                        style="width:
+                            {% if product.stock_quantity >= 100 %}
+                                100%
+                            {% else %}
+                                {{ product.stock_quantity }}%
+                            {% endif %}
+                        ;"
+                    ></div>
+
+                </div>
+
+                <!-- ACTIONS -->
+
+                <div class="product-actions">
+
+                    <a
+                        href="/admin/product/edit/{{ product.id }}"
+                        class="action-btn btn-edit"
+                    >
+                        Edit
+                    </a>
+                    <form
+    action="/admin/product/toggle/{{ product.id }}"
+    method="post"
+>
+
+<button
+    type="submit"
+    class="action-btn
+    {% if product.is_active %}
+        btn-delete
+    {% else %}
+        btn-edit
+    {% endif %}
+    "
+    onclick="
+        return confirm(
+            '{% if product.is_active %}Deactivate{% else %}Activate{% endif %} {{ product.name }}?'
+        )
+    "
+>
+
+    {% if product.is_active %}
+        Deactivate
+    {% else %}
+        Activate
+    {% endif %}
+
+</button>
+
+</form>
+
+                </div>
+
+            </div>
+
+        </li>
+
+        {% endfor %}
+
+    </ul>
+
+    {% else %}
+
+    <!-- EMPTY -->
+
+    <div class="empty-state">
+
+        <h2>
+            No Products
+        </h2>
+
+        <p>
+            Your handmade collection is empty right now.
+            Start by adding your first product.
+        </p>
+
+        <a href="/admin/product/add" class="btn-add">
+            ✨ Add First Product
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

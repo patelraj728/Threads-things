@@ -1,0 +1,698 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Thread & Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   PRODUCT PAGE
+========================================================= */
+
+.product-page{
+  min-height:100vh;
+  padding:
+    calc(var(--nav-h) + 40px)
+    clamp(20px,5vw,70px)
+    100px;
+}
+
+#product-page{
+  padding:100px;
+}
+
+/* =========================================================
+   BACK LINK
+========================================================= */
+
+.back-link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  margin-bottom:40px;
+
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+  transition:all .25s ease;
+}
+
+.back-link:hover{
+  color:var(--ink);
+  transform:translateX(-4px);
+}
+
+/* =========================================================
+   PRODUCT LAYOUT
+========================================================= */
+
+.product-layout{
+  display:grid;
+
+  grid-template-columns:
+    minmax(320px,520px)
+    minmax(320px,1fr);
+
+  gap:70px;
+
+  align-items:start;
+
+  margin-bottom:90px;
+}
+
+@media(max-width:980px){
+
+  .product-layout{
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+
+}
+
+/* =========================================================
+   GALLERY
+========================================================= */
+
+.product-gallery{
+  position:sticky;
+  top:calc(var(--nav-h) + 20px);
+}
+
+.main-image{
+  width:100%;
+  aspect-ratio:4/5;
+
+  overflow:hidden;
+
+  border-radius:22px;
+
+  background:var(--cream-2);
+
+  border:1px solid rgba(255,255,255,.6);
+
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.06);
+
+  position:relative;
+}
+
+.main-image img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  transition:all .4s ease;
+}
+
+.main-image:hover img{
+  transform:scale(1.03);
+}
+
+.placeholder{
+  width:100%;
+  height:100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--cream-2),
+      var(--taupe)
+    );
+}
+
+/* =========================================================
+   THUMBNAILS
+========================================================= */
+
+.thumbnail-row{
+  display:flex;
+
+  gap:14px;
+
+  margin-top:18px;
+
+  overflow-x:auto;
+
+  padding-bottom:6px;
+}
+
+.thumbnail-row::-webkit-scrollbar{
+  height:6px;
+}
+
+.thumbnail-row::-webkit-scrollbar-thumb{
+  background:rgba(0,0,0,.15);
+  border-radius:999px;
+}
+
+.thumb{
+  width:90px;
+  height:110px;
+
+  flex-shrink:0;
+
+  border-radius:18px;
+
+  overflow:hidden;
+
+  cursor:pointer;
+
+  border:2px solid transparent;
+
+  transition:all .25s ease;
+
+  background:white;
+}
+
+.thumb.active{
+  border-color:var(--sage);
+}
+
+.thumb img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+}
+
+.thumb:hover{
+  transform:translateY(-3px);
+}
+
+/* =========================================================
+   SLIDER BUTTONS
+========================================================= */
+
+.slider-btn{
+  position:absolute;
+
+  top:50%;
+  transform:translateY(-50%);
+
+  width:44px;
+  height:44px;
+
+  border:none;
+
+  border-radius:50%;
+
+  background:rgba(255,255,255,.85);
+
+  backdrop-filter:blur(10px);
+
+  cursor:pointer;
+
+  z-index:5;
+
+  font-size:20px;
+
+  color:var(--ink);
+
+  transition:.25s ease;
+}
+
+.slider-btn:hover{
+  background:white;
+  transform:translateY(-50%) scale(1.08);
+}
+
+.slider-prev{
+  left:14px;
+}
+
+.slider-next{
+  right:14px;
+}
+
+/* =========================================================
+   PRODUCT INFO
+========================================================= */
+
+.product-info{
+  max-width:620px;
+}
+
+.product-category{
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+  margin-bottom:16px;
+}
+
+.product-title{
+  font-family:var(--serif);
+  font-size:clamp(42px,6vw,76px);
+  font-weight:300;
+
+  line-height:.94;
+  letter-spacing:-.05em;
+
+  margin:0 0 22px;
+
+  color:var(--ink);
+}
+
+.product-price{
+  font-family:var(--serif);
+  font-style:italic;
+
+  font-size:42px;
+
+  color:var(--sage);
+
+  margin-bottom:24px;
+}
+
+.stock{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  padding:10px 14px;
+
+  border-radius:999px;
+
+  margin-bottom:28px;
+
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.stock.in{
+  background:#edf7ef;
+  color:#3d7a4d;
+}
+
+.stock.out{
+  background:#fdecec;
+  color:#c0392b;
+}
+
+.product-description{
+  font-size:15px;
+  line-height:1.9;
+
+  color:var(--ink-soft);
+
+  margin-bottom:34px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.product-actions{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.qty-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+
+  margin:0 0 20px 0;
+}
+
+.qty-row label{
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+.qty-input{
+  width:90px;
+
+  padding:12px 14px;
+
+  border-radius:999px;
+
+  border:1px solid var(--line);
+
+  background:white;
+
+  outline:none;
+}
+
+.action-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.btn-product{
+  border:none;
+  cursor:pointer;
+
+  padding:14px 24px;
+
+  border-radius:999px;
+
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  transition:all .3s ease;
+}
+
+.btn-dark{
+  background:var(--ink);
+  color:var(--cream);
+
+  border:1px solid var(--ink);
+}
+
+.btn-dark:hover{
+  background:var(--sage);
+  border-color:var(--sage);
+}
+
+.btn-light{
+  background:transparent;
+
+  border:1px solid var(--line);
+
+  color:var(--ink-soft);
+}
+
+.btn-light:hover{
+  background:white;
+
+  border-color:var(--ink);
+
+  color:var(--ink);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+  .product-page{
+    padding:
+      calc(var(--nav-h) + 10px)
+      16px
+      70px;
+  }
+
+  #product-page{
+    padding:100px 24px;
+  }
+
+  .product-title{
+    font-size:48px;
+  }
+
+  .product-price{
+    font-size:34px;
+  }
+
+  .action-buttons{
+    flex-direction:column;
+  }
+
+  .btn-product{
+    width:100%;
+  }
+
+  .thumb{
+    width:74px;
+    height:92px;
+  }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="product-page" id="product-page">
+
+  <a href="/product/shop" class="back-link">
+    ← Back to Shop
+  </a>
+
+  <div class="product-layout">
+
+    <!-- ======================================================
+         PRODUCT GALLERY
+    ======================================================= -->
+
+    <div class="product-gallery">
+
+      <div class="main-image">
+
+        {% if product.images %}
+
+        <button class="slider-btn slider-prev" id="prevBtn">
+          ‹
+        </button>
+
+        <img
+          id="mainProductImage"
+          src="{{ url_for('static', filename=product.images[0].image_url) }}"
+          alt="{{ product.name }}"
+        >
+
+        <button class="slider-btn slider-next" id="nextBtn">
+          ›
+        </button>
+
+        {% else %}
+
+        <div class="placeholder"></div>
+
+        {% endif %}
+
+      </div>
+
+      <!-- THUMBNAILS -->
+
+      {% if product.images %}
+
+      <div class="thumbnail-row">
+
+        {% for image in product.images %}
+
+        <div
+          class="thumb {% if loop.first %}active{% endif %}"
+          data-image="{{ url_for('static', filename=image.image_url) }}"
+        >
+
+          <img
+            src="{{ url_for('static', filename=image.image_url) }}"
+            alt="{{ product.name }}"
+          >
+
+        </div>
+
+        {% endfor %}
+
+      </div>
+
+      {% endif %}
+
+    </div>
+
+    <!-- ======================================================
+         PRODUCT INFO
+    ======================================================= -->
+
+    <div class="product-info">
+
+      <div class="product-category">
+        {{ product.category.name }}
+      </div>
+
+      <h1 class="product-title">
+        {{ product.name }}
+      </h1>
+
+      <div class="product-price">
+        ₹{{ product.price }}
+      </div>
+
+      {% if product.stock_quantity > 0 %}
+
+      <div class="stock in">
+        ✔ In Stock
+      </div>
+
+      {% else %}
+
+      <div class="stock out">
+        ✘ Out of Stock
+      </div>
+
+      {% endif %}
+
+      <div class="product-description">
+        {{ product.description }}
+      </div>
+
+      <!-- ACTIONS -->
+
+      {% if session.user_id %}
+
+        {% if product.stock_quantity > 0 %}
+
+        <div class="product-actions">
+
+          <form
+            class="ajax-form"
+            action="/cart/add/{{ product.id }}"
+            method="post"
+          >
+
+            <div class="qty-row">
+
+              <label>
+                Quantity
+              </label>
+
+              <input
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                max="{{ product.stock_quantity }}"
+                class="qty-input"
+              >
+
+            </div>
+
+            <div class="action-buttons">
+
+              <button
+                type="submit"
+                class="btn-product btn-dark"
+              >
+                Add to Cart
+              </button>
+
+              <a
+                href="{{ url_for('order.checkout', buy_now=product.id, quantity=1) }}"
+                class="btn-product btn-light"
+                style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;"
+              >
+                Buy Now
+              </a>
+
+            </div>
+
+          </form>
+
+        </div>
+
+        {% endif %}
+
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     IMAGE SLIDER SCRIPT
+========================================================= -->
+
+<script>
+
+const mainImage =
+  document.getElementById('mainProductImage');
+
+const thumbs =
+  document.querySelectorAll('.thumb');
+
+let currentIndex = 0;
+
+const images = [];
+
+thumbs.forEach((thumb, index) => {
+
+  images.push(
+    thumb.dataset.image
+  );
+
+  thumb.addEventListener('click', () => {
+
+    changeImage(index);
+
+  });
+
+});
+
+function changeImage(index){
+
+  currentIndex = index;
+
+  mainImage.src = images[index];
+
+  thumbs.forEach(t =>
+    t.classList.remove('active')
+  );
+
+  thumbs[index]
+    .classList.add('active');
+}
+
+/* NEXT */
+
+const nextBtn =
+  document.getElementById('nextBtn');
+
+if(nextBtn){
+
+  nextBtn.addEventListener('click', () => {
+
+    currentIndex++;
+
+    if(currentIndex >= images.length){
+      currentIndex = 0;
+    }
+
+    changeImage(currentIndex);
+
+  });
+
+}
+
+/* PREVIOUS */
+
+const prevBtn =
+  document.getElementById('prevBtn');
+
+if(prevBtn){
+
+  prevBtn.addEventListener('click', () => {
+
+    currentIndex--;
+
+    if(currentIndex < 0){
+      currentIndex = images.length - 1;
+    }
+
+    changeImage(currentIndex);
+
+  });
+
+}
+
+</script>
+
+{% endblock %}

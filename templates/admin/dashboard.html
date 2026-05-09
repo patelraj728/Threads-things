@@ -1,0 +1,750 @@
+{% extends "admin/base_admin.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Admin Dashboard{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard-page{
+    display:flex;
+    flex-direction:column;
+    gap:32px;
+}
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome-card{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.78),
+            rgba(255,255,255,.58)
+        );
+
+    border:1px solid var(--line);
+
+    border-radius:34px;
+
+    padding:40px;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.05);
+
+    animation:fadeUp .7s ease;
+}
+
+.welcome-label{
+    font-size:11px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:16px;
+}
+
+.welcome-title{
+    font-family:var(--serif);
+
+    font-size:clamp(40px,5vw,72px);
+
+    line-height:.95;
+
+    letter-spacing:-.04em;
+
+    font-weight:400;
+
+    margin-bottom:18px;
+
+    color:var(--ink);
+}
+
+.welcome-title em{
+    font-style:italic;
+
+    color:var(--sage);
+}
+
+.welcome-text{
+    max-width:700px;
+
+    color:var(--ink-soft);
+
+    font-size:15px;
+
+    line-height:1.8;
+}
+
+/* floating circles */
+
+.glow{
+    position:absolute;
+
+    border-radius:999px;
+
+    filter:blur(40px);
+
+    opacity:.25;
+
+    pointer-events:none;
+}
+
+.glow.one{
+    width:220px;
+    height:220px;
+
+    background:#6B7355;
+
+    top:-40px;
+    right:-40px;
+}
+
+.glow.two{
+    width:180px;
+    height:180px;
+
+    background:#B8A68A;
+
+    bottom:-60px;
+    left:10%;
+}
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+.flash-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.flash{
+    padding:14px 18px;
+
+    border-radius:16px;
+
+    font-size:14px;
+
+    animation:fadeUp .5s ease;
+}
+
+.flash-success{
+    background:#e8f7eb;
+    color:#1f6b34;
+}
+
+.flash-error{
+    background:#fdecec;
+    color:#8a1f1f;
+}
+
+.flash-info{
+    background:#ebf5fb;
+    color:#16527a;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(240px,1fr));
+
+    gap:24px;
+}
+
+.stat-card{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        rgba(255,255,255,.72);
+
+    border:1px solid var(--line);
+
+    border-radius:28px;
+
+    padding:28px;
+
+    backdrop-filter:blur(14px);
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+
+    animation:fadeUp .7s ease;
+}
+
+.stat-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:
+        0 20px 40px rgba(0,0,0,.08);
+}
+
+.stat-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:20px;
+}
+
+.stat-icon{
+
+    width:58px;
+    height:58px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:26px;
+
+    background:rgba(255,255,255,.8);
+
+    border:1px solid rgba(255,255,255,.7);
+}
+
+.stat-badge{
+
+    font-size:10px;
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+.stat-number{
+
+    font-size:52px;
+
+    font-weight:700;
+
+    line-height:1;
+
+    margin-bottom:10px;
+
+    color:var(--ink);
+}
+
+.stat-label{
+
+    font-size:14px;
+
+    color:var(--ink-soft);
+}
+
+/* card accent */
+
+.stat-card::before{
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+        radial-gradient(circle at top right,
+        rgba(255,255,255,.8),
+        transparent 40%);
+
+    pointer-events:none;
+}
+
+.products{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(90,150,255,.12),
+            rgba(255,255,255,.75)
+        );
+}
+
+.users{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(16,185,129,.12),
+            rgba(255,255,255,.75)
+        );
+}
+
+.orders{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(168,85,247,.12),
+            rgba(255,255,255,.75)
+        );
+}
+
+.pending{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(245,158,11,.15),
+            rgba(255,255,255,.75)
+        );
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.actions-wrap{
+    background:
+        rgba(255,255,255,.72);
+
+    border:1px solid var(--line);
+
+    border-radius:32px;
+
+    padding:32px;
+
+    backdrop-filter:blur(16px);
+}
+
+.section-label{
+    font-size:11px;
+
+    letter-spacing:.24em;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:10px;
+}
+
+.section-title{
+    font-size:34px;
+
+    font-family:var(--serif);
+
+    font-weight:400;
+
+    margin-bottom:26px;
+}
+
+.quick-actions{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(220px,1fr));
+
+    gap:18px;
+}
+
+.action-btn{
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:22px;
+
+    border-radius:24px;
+
+    text-decoration:none;
+
+    background:white;
+
+    border:1px solid var(--line);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+.action-btn:hover{
+
+    transform:translateY(-5px);
+
+    background:var(--ink);
+
+    box-shadow:
+        0 15px 30px rgba(0,0,0,.08);
+}
+
+.action-btn:hover .action-text h4,
+.action-btn:hover .action-text p{
+
+    color:white;
+}
+
+.action-icon{
+
+    width:58px;
+    height:58px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:26px;
+
+    background:var(--cream);
+}
+
+.action-text h4{
+
+    font-size:16px;
+
+    margin-bottom:4px;
+
+    color:var(--ink);
+
+    transition:.25s ease;
+}
+
+.action-text p{
+
+    font-size:13px;
+
+    color:var(--muted);
+
+    transition:.25s ease;
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(25px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:768px){
+
+    .welcome-card{
+        padding:28px;
+    }
+
+    .stat-number{
+        font-size:42px;
+    }
+
+    .section-title{
+        font-size:28px;
+    }
+
+    .quick-actions{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <!-- =====================================================
+         FLASH
+    ====================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+
+        <div class="flash-wrap">
+
+            {% for category, message in messages %}
+
+            <div class="flash flash-{{ category }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+    {% endwith %}
+
+    <!-- =====================================================
+         HERO / WELCOME
+    ====================================================== -->
+
+    <section class="welcome-card">
+
+        <div class="glow one"></div>
+        <div class="glow two"></div>
+
+        <div class="welcome-label">
+            Admin Overview
+        </div>
+
+        <div class="welcome-title">
+            Welcome back, <em>Admin.</em>
+        </div>
+
+        <div class="welcome-text">
+            Manage products, customers, orders, and categories
+            from one beautifully crafted dashboard built for
+            Thread & Things.
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         STATS
+    ====================================================== -->
+
+    <section class="stats-grid">
+
+        <!-- PRODUCTS -->
+
+        <div class="stat-card products">
+
+            <div class="stat-top">
+
+                <div class="stat-icon">
+                    📦
+                </div>
+
+                <div class="stat-badge">
+                    Products
+                </div>
+
+            </div>
+
+            <div class="stat-number">
+                {{ total_products }}
+            </div>
+
+            <div class="stat-label">
+                Total products available in your store.
+            </div>
+
+        </div>
+
+        <!-- USERS -->
+
+        <div class="stat-card users">
+
+            <div class="stat-top">
+
+                <div class="stat-icon">
+                    👥
+                </div>
+
+                <div class="stat-badge">
+                    Customers
+                </div>
+
+            </div>
+
+            <div class="stat-number">
+                {{ total_users }}
+            </div>
+
+            <div class="stat-label">
+                Registered users shopping on your platform.
+            </div>
+
+        </div>
+
+        <!-- ORDERS -->
+
+        <div class="stat-card orders">
+
+            <div class="stat-top">
+
+                <div class="stat-icon">
+                    🧾
+                </div>
+
+                <div class="stat-badge">
+                    Orders
+                </div>
+
+            </div>
+
+            <div class="stat-number">
+                {{ total_orders }}
+            </div>
+
+            <div class="stat-label">
+                Orders placed successfully by customers.
+            </div>
+
+        </div>
+
+        <!-- PENDING -->
+
+        <div class="stat-card pending">
+
+            <div class="stat-top">
+
+                <div class="stat-icon">
+                    ⏳
+                </div>
+
+                <div class="stat-badge">
+                    Pending
+                </div>
+
+            </div>
+
+            <div class="stat-number">
+                {{ pending_orders }}
+            </div>
+
+            <div class="stat-label">
+                Orders waiting for confirmation or shipment.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         QUICK ACTIONS
+    ====================================================== -->
+
+    <section class="actions-wrap">
+
+        <div class="section-label">
+            Shortcuts
+        </div>
+
+        <div class="section-title">
+            Quick Actions
+        </div>
+
+        <div class="quick-actions">
+
+            <!-- ADD PRODUCT -->
+
+            <a href="/admin/product/add" class="action-btn">
+
+                <div class="action-icon">
+                    ➕
+                </div>
+
+                <div class="action-text">
+                    <h4>Add Product</h4>
+                    <p>Create and publish a new product.</p>
+                </div>
+
+            </a>
+
+            <!-- CATEGORIES -->
+
+            <a href="/admin/categories" class="action-btn">
+
+                <div class="action-icon">
+                    🏷️
+                </div>
+
+                <div class="action-text">
+                    <h4>Categories</h4>
+                    <p>Manage all store categories.</p>
+                </div>
+
+            </a>
+
+            <!-- PRODUCTS -->
+
+            <a href="/admin/product" class="action-btn">
+
+                <div class="action-icon">
+                    📦
+                </div>
+
+                <div class="action-text">
+                    <h4>Products</h4>
+                    <p>View and update all products.</p>
+                </div>
+
+            </a>
+
+            <!-- USERS -->
+
+            <a href="/admin/users" class="action-btn">
+
+                <div class="action-icon">
+                    👥
+                </div>
+
+                <div class="action-text">
+                    <h4>Users</h4>
+                    <p>Manage registered customers.</p>
+                </div>
+
+            </a>
+
+            <!-- ORDERS -->
+
+            <a href="/order/admin/orders" class="action-btn">
+
+                <div class="action-icon">
+                    🧾
+                </div>
+
+                <div class="action-text">
+                    <h4>Orders</h4>
+                    <p>Track and manage customer orders.</p>
+                </div>
+
+            </a>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

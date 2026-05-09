@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Processing Payment</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</head>
+<body>
+
+<script>
+
+var options = {
+
+    "key": "{{ razorpay_key }}",
+
+    "amount": "{{ amount }}",
+
+    "currency": "INR",
+
+    "name": "Thread & Things",
+
+    "description": "Order Payment",
+
+    "order_id": "{{ razorpay_order_id }}",
+
+    "handler": function (response){
+
+        var form = document.createElement('form');
+
+        form.method = 'POST';
+
+        form.action = '/order/payment/success';
+
+        form.innerHTML = `
+
+            <input
+                type="hidden"
+                name="razorpay_payment_id"
+                value="${response.razorpay_payment_id}"
+            >
+
+            <input
+                type="hidden"
+                name="razorpay_order_id"
+                value="${response.razorpay_order_id}"
+            >
+
+            <input
+                type="hidden"
+                name="razorpay_signature"
+                value="${response.razorpay_signature}"
+            >
+        `;
+
+        document.body.appendChild(form);
+
+        form.submit();
+    },
+
+    "theme": {
+        "color": "#111111"
+    }
+
+};
+
+var rzp = new Razorpay(options);
+
+rzp.open();
+
+rzp.on('payment.failed', function (response) {
+
+    console.log(response);
+
+    alert(
+        response.error.description
+    );
+
+    window.location.href =
+        "/order/payment/failed?razorpay_order_id={{ razorpay_order_id }}";
+});
+
+</script>
+
+</body>
+</html>

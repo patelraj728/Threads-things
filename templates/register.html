@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+{% block title %}Register — Thread & Things{% endblock %}
+
+{% block head_extra %}
+<style>
+
+/* =========================================================
+   REGISTER PAGE
+========================================================= */
+
+.auth-page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:
+    calc(var(--nav-h) + 40px)
+    20px
+    80px;
+
+  position:relative;
+  overflow:hidden;
+}
+#auth-page{
+    padding: 100px;
+}
+
+/* Background glow */
+
+.auth-page::before{
+  content:"";
+
+  position:absolute;
+
+  width:700px;
+  height:700px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(181,101,29,.08),
+      transparent 70%
+    );
+
+  top:-250px;
+  right:-250px;
+
+  pointer-events:none;
+}
+
+.auth-page::after{
+  content:"";
+
+  position:absolute;
+
+  width:500px;
+  height:500px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(120,140,120,.08),
+      transparent 70%
+    );
+
+  bottom:-180px;
+  left:-180px;
+
+  pointer-events:none;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.auth-card{
+  width:100%;
+  max-width:480px;
+    margin-left: 300px;
+  position:relative;
+  z-index:2;
+
+  padding:46px;
+
+  border-radius:32px;
+
+  background:
+    rgba(255,255,255,.62);
+
+  backdrop-filter:blur(16px);
+
+  border:
+    1px solid rgba(255,255,255,.7);
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.08);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.auth-label{
+  font-size:11px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+  margin-bottom:18px;
+
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.auth-label::before{
+  content:"";
+
+  width:34px;
+  height:1px;
+
+  background:var(--muted);
+}
+
+.auth-title{
+  font-family:var(--serif);
+  font-size:clamp(42px,6vw,68px);
+  font-weight:300;
+
+  line-height:.95;
+  letter-spacing:-.05em;
+
+  color:var(--ink);
+
+  margin:0 0 18px;
+}
+
+.auth-title em{
+  font-style:italic;
+  color:var(--sage);
+}
+
+.auth-sub{
+  font-size:15px;
+  line-height:1.8;
+
+  color:var(--ink-soft);
+
+  margin-bottom:38px;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.auth-form{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.form-group label{
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+.input-wrap{
+  position:relative;
+}
+
+.form-input{
+  width:100%;
+
+  padding:
+    16px 18px;
+
+  border-radius:18px;
+
+  border:1px solid var(--line);
+
+  background:
+    rgba(255,255,255,.9);
+
+  color:var(--ink);
+
+  font-size:15px;
+
+  outline:none;
+
+  transition:
+    border-color .25s ease,
+    box-shadow .25s ease,
+    transform .25s ease;
+}
+
+.form-input:focus{
+  border-color:var(--sage);
+
+  box-shadow:
+    0 0 0 4px rgba(120,140,120,.08);
+
+  transform:translateY(-1px);
+}
+
+.form-input::placeholder{
+  color:#aaa;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.auth-btn{
+  margin-top:8px;
+
+  border:none;
+  cursor:pointer;
+
+  padding:16px 22px;
+
+  border-radius:999px;
+
+  background:var(--ink);
+  color:var(--cream);
+
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+
+  transition:
+    transform .25s ease,
+    background .25s ease,
+    box-shadow .25s ease;
+}
+
+.auth-btn:hover{
+  background:var(--sage);
+
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.12);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.auth-footer{
+  margin-top:30px;
+
+  text-align:center;
+
+  font-size:14px;
+
+  color:var(--ink-soft);
+}
+
+.auth-footer a{
+  color:var(--ink);
+
+  font-weight:600;
+
+  transition:opacity .2s ease;
+}
+
+.auth-footer a:hover{
+  opacity:.7;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:640px){
+
+  .auth-page{
+    padding:
+      calc(var(--nav-h) + 10px)
+      14px
+      50px;
+  }
+  body{
+    width: 100vh;
+  }
+  .auth-card{
+    width: 600px;
+    padding:32px 24px;
+     margin: 60px 10px;
+    border-radius:24px;
+  }
+  .auth-title{
+    font-size:46px;
+  }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="auth-page" id="auth-page">
+
+  <div class="auth-card">
+
+    <!-- HEADER -->
+
+    <div class="auth-label">
+      Join Thread & Things
+    </div>
+
+    <h1 class="auth-title">
+      Create your <em>account.</em>
+    </h1>
+
+    <p class="auth-sub">
+      Handmade pieces, crafted slowly and thoughtfully —
+      create your account to save favorites,
+      manage orders, and shop the collection.
+    </p>
+
+    <!-- FORM -->
+
+    <form
+      action="/auth/register"
+      method="post"
+      class="auth-form"
+    >
+
+      <!-- NAME -->
+
+      <div class="form-group">
+
+        <label for="username">
+          Full Name
+        </label>
+
+        <div class="input-wrap">
+
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            placeholder="Enter your full name"
+            required
+          >
+
+        </div>
+
+      </div>
+
+      <!-- EMAIL -->
+
+      <div class="form-group">
+
+        <label for="email">
+          Email Address
+        </label>
+
+        <div class="input-wrap">
+
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="you@example.com"
+            required
+          >
+
+        </div>
+
+      </div>
+
+      <!-- PASSWORD -->
+
+      <div class="form-group">
+
+        <label for="password">
+          Password
+        </label>
+
+        <div class="input-wrap">
+
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="Minimum 6 characters"
+            minlength="6"
+            required
+          >
+
+        </div>
+
+      </div>
+
+      <!-- PHONE -->
+
+      <div class="form-group">
+
+        <label for="phone">
+          Phone Number
+        </label>
+
+        <div class="input-wrap">
+
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="form-input"
+            placeholder="+91 98765 43210"
+            required
+          >
+
+        </div>
+
+      </div>
+
+      <!-- BUTTON -->
+
+      <button
+        type="submit"
+        class="auth-btn"
+      >
+        Create Account
+      </button>
+
+    </form>
+
+    <!-- FOOTER -->
+
+    <div class="auth-footer">
+
+      Already have an account?
+      <a href="/auth/login">
+        Login
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}
