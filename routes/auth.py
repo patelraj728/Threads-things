@@ -89,7 +89,7 @@ def register():
 
 @auth_bp.route('/google')
 def google_login():
-    redirect_uri = "http://127.0.0.1:5000/auth/google/callback"
+    redirect_uri = "https://threads-things.onrender.com/auth/google/callback"
     params = {
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": redirect_uri,
